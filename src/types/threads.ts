@@ -4,6 +4,7 @@ export interface Thread {
   id: number;
   content: string;
   images: string | null;
+  image?: string;
   user: User;
   created_at: string;
   likes: number;
@@ -60,4 +61,15 @@ export interface ThreadDialogProps {
   onImageChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onRemoveImage: () => void;
   onPost: () => void;
+}
+
+export interface GetOneThreadById {
+  id: number,
+  content: string,
+  image?: string | null,
+  likes: number,
+  replies: number
+  created_at: string,
+  user?: User
+  isLiked?: boolean
 }

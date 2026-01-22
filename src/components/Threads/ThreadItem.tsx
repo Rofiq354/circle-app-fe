@@ -1,5 +1,6 @@
 import type { ThreadItemProps } from "@/types/threads";
 import { HeartIcon, MessagesSquare } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export const ThreadItem: React.FC<ThreadItemProps> = ({
   id,
@@ -34,55 +35,57 @@ export const ThreadItem: React.FC<ThreadItemProps> = ({
     });
   };
   return (
-    <div className="border-b border-[#333] p-4">
-      <div className="flex gap-3">
-        <img
-          src={user.profile_picture}
-          alt="avatar"
-          className="w-10 h-10 rounded-full bg-white"
-        />
+    <div className="border-b border-[#333] p-4 hover:bg-[#2a2a2a]">
+      <Link to={`/thread/${id}`}>
+        <div className="flex gap-3">
+          <img
+            src={user.profile_picture}
+            alt="avatar"
+            className="w-10 h-10 rounded-full bg-white"
+          />
 
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-white capitalize">
-              {user.fullname}
-            </span>
-            <span className="text-[#777] lowercase">@{user.username}</span>
-            <span className="text-[#777]">• {timeAgo(created_at ?? "")}</span>
-          </div>
-
-          <p className="text-[#bfbfbf] mt-2">{content}</p>
-
-          {images && (
-            <div className="mt-3 w-4/5">
-              <img
-                src={`${images}`}
-                alt="thread image"
-                className="rounded-xl w-full max-h-87.5 bg-white object-cover"
-              />
-            </div>
-          )}
-
-          <div className="flex items-center gap-6 mt-3">
-            <div
-              className="flex items-center gap-2 text-[#777] cursor-pointer"
-              onClick={() => onLike?.(id as number)}
-            >
-              <HeartIcon
-                className={`w-5 h-5 ${isLiked ? "text-red-500 fill-red-500 scale-110" : "text-[#777]"}`}
-              />
-              <span className={`${isLiked ? "text-white" : "text-[#777]"}`}>
-                {likes}
+          <div className="flex-1">
+            <div className="flex items-center gap-2">
+              <span className="font-bold text-white capitalize">
+                {user.fullname}
               </span>
+              <span className="text-[#777] lowercase">@{user.username}</span>
+              <span className="text-[#777]">• {timeAgo(created_at ?? "")}</span>
             </div>
 
-            <div className="flex items-center gap-2 text-[#777]">
-              <MessagesSquare className="w-5 h-5" />
-              <span>{reply === 0 ? "" : reply} Replies</span>
+            <p className="text-[#bfbfbf] mt-2">{content}</p>
+
+            {images && (
+              <div className="mt-3 w-4/5">
+                <img
+                  src={`${images}`}
+                  alt="thread image"
+                  className="rounded-xl w-full max-h-87.5 bg-white object-cover"
+                />
+              </div>
+            )}
+
+            <div className="flex items-center gap-6 mt-3">
+              <div
+                className="flex items-center gap-2 text-[#777] cursor-pointer"
+                onClick={() => onLike?.(id as number)}
+              >
+                <HeartIcon
+                  className={`w-5 h-5 ${isLiked ? "text-red-500 fill-red-500 scale-110" : "text-[#777]"}`}
+                />
+                <span className={`${isLiked ? "text-white" : "text-[#777]"}`}>
+                  {likes}
+                </span>
+              </div>
+
+              <div className="flex items-center gap-2 text-[#777]">
+                <MessagesSquare className="w-5 h-5" />
+                <span>{reply === 0 ? "" : reply} Replies</span>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </Link>
     </div>
   );
 };

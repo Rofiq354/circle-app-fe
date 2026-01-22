@@ -1,17 +1,15 @@
-import { useModalThread } from "@/hooks/useThread";
 import type { ThreadComposerProps } from "@/types/threads";
 import { PlusCircleIcon } from "lucide-react";
 import { useRef } from "react";
 
-const ThreadComposer: React.FC<ThreadComposerProps> = ({
+const ReplyMessage: React.FC<ThreadComposerProps> = ({
   onPost,
   onAttach,
   inputClick,
-  placeholder = "What is happening?!",
-  isPosting,
+  placeholder = "Type your reply!",
+  isPosting = false,
   className = "",
 }) => {
-   const { openModal } = useModalThread();
   const contentRef = useRef<HTMLInputElement>(null);
 
   const handleButtonClick = () => {
@@ -25,9 +23,7 @@ const ThreadComposer: React.FC<ThreadComposerProps> = ({
   };
 
   return (
-    <div className={`w-full border-b border-[#222] px-6 py-3 ${className}`}>
-      <h1 className="text-white text-2xl font-medium">Home</h1>
-
+    <div className={`w-full border-b border-[#333] bg-[#1d1d1d] sticky top-0 px-7 ${className}`}>
       <div className="flex items-center gap-3 w-full my-6">
         <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-700">
           <img
@@ -40,18 +36,15 @@ const ThreadComposer: React.FC<ThreadComposerProps> = ({
         <input
           type="text"
           placeholder={placeholder}
-          // value={value}
           ref={contentRef}
           className="bg-transparent outline-none text-[#bdbdbd] placeholder:text-[#777] text-lg w-full"
-          // onChange={(e) => onChange(e.target.value)}
-          // onFocus={inputClick}
         />
 
         {/* Likes */}
         <div className="flex items-center gap-3">
           <button
             className="p-2 rounded-full hover:bg-white/10"
-            onClick={onAttach || inputClick || openModal}
+            onClick={onAttach || inputClick}
           >
             <PlusCircleIcon className="w-6 h-6 cursor-pointer text-green-500" />
           </button>
@@ -61,7 +54,7 @@ const ThreadComposer: React.FC<ThreadComposerProps> = ({
             onClick={handleButtonClick}
             disabled={isPosting}
           >
-            {isPosting ? "Posting..." : "Post"}
+            {isPosting ? "Replying..." : "Reply"}
           </button>
         </div>
       </div>
@@ -69,4 +62,4 @@ const ThreadComposer: React.FC<ThreadComposerProps> = ({
   );
 };
 
-export default ThreadComposer;
+export default ReplyMessage;

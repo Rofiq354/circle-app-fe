@@ -8,6 +8,7 @@ import ResetPasswordPage from "./pages/Auth/ResetPassword";
 import MainPage from "./pages";
 import Threads from "./pages/Threads/Threads";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import ThreadDetailPage from "./pages/Threads/ThreadDetail";
 
 function App() {
   return (
@@ -25,6 +26,7 @@ function App() {
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<MainPage />}>
               <Route index element={<Threads />} />
+              <Route path="thread/:id" element={<ThreadDetailPage />} />
             </Route>
           </Route>
         </Routes>

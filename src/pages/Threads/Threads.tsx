@@ -1,10 +1,10 @@
 import ThreadComposer from "@/components/Threads/ThreadComposer";
 import { ThreadItem, ThreadSkeleton } from "@/components/Threads/ThreadItem";
 import { useState } from "react";
-import { useModalThread, useThread } from "@/hooks/useThread";
+import { useThread } from "@/hooks/useThread";
+import { ModalThreadProvider } from "@/context/Threads/ThreadContext";
 
 const Threads: React.FC = () => {
-  const { openModal } = useModalThread();
   const { threads, toggleLike, loading, addThread } = useThread();
   const [isPosting, setIsPosting] = useState(false);
 
@@ -21,14 +21,13 @@ const Threads: React.FC = () => {
   };
 
   return (
-    <div className="w-full bg-[#1d1d1d]">
-      <ThreadComposer
-        // value={content}
-        // onChange={setContent}
-        inputClick={openModal}
-        onPost={handlePost}
-        isPosting={isPosting}
-      />
+    <div className="w-full bg-[#1d1d1d] relative">
+      <ModalThreadProvider>
+        <ThreadComposer
+          onPost={handlePost}
+          isPosting={isPosting}
+        />
+      </ModalThreadProvider>
 
       {loading ? (
         <ThreadSkeleton />

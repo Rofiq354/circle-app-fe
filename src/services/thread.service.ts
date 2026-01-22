@@ -1,5 +1,5 @@
 import api from "@/api/axios";
-import type { Thread, Tweet } from "@/types/threads";
+import type { GetOneThreadById, Thread, Tweet } from "@/types/threads";
 
 export interface GetThreadsResponse {
   code: number;
@@ -8,6 +8,13 @@ export interface GetThreadsResponse {
   data: {
     threads: Thread[];
   };
+}
+
+export interface GetOneThreadResponse {
+  code: number;
+  status: string;
+  message: string;
+  data?: GetOneThreadById;
 }
 
 export interface CreateThreadsResponse {
@@ -25,8 +32,9 @@ export const getAllThreads = async (): Promise<Thread[]> => {
 };
 
 export const getThreadById = async (id: number): Promise<Thread> => {
-  const res = await api.get<GetThreadsResponse>(`/thread/${id}`);
-  return res.data.data.threads[0];
+  const res = await api.get(`/thread/${id}`);
+  // return res.data.data.threads[0];
+  return res.data.data;
 };
 
 export const createThread = async (
