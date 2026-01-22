@@ -1,46 +1,62 @@
 import type { ThreadComposerProps } from "@/types/threads";
 import { PlusCircleIcon } from "lucide-react";
+import { useRef } from "react";
 
 const ThreadComposer: React.FC<ThreadComposerProps> = ({
-  value,
-  onChange,
   onPost,
   onAttach,
+  inputClick,
   placeholder = "What is happening?!",
-  isPosting = false,
+  isPosting,
   className = "",
 }) => {
+  const contentRef = useRef<HTMLInputElement>(null);
+
+  const handleButtonClick = () => {
+    try {
+      const val = contentRef.current?.value || "";
+      onPost?.(val); // Kirim value ke parent
+      if (contentRef.current) contentRef.current.value = ""; // Reset input setelah klik
+    } catch (error) {
+      console.error("Error when handling button click:", error);
+    }
+  };
+
   return (
     <div className={`w-11/12 border-b border-[#222] px-6 ${className}`}>
       <h1 className="text-white text-2xl font-medium">Home</h1>
 
       <div className="flex items-center gap-3 w-full my-6">
-        <img
-          src="https://i.pravatar.cc/40"
-          alt="avatar"
-          className="w-9 h-9 rounded-full object-cover"
-        />
+        <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-700">
+          <img
+            src="https://i.pravatar.cc/40"
+            alt="avatar"
+            className="w-full h-full object-cover bg-white"
+          />
+        </div>
 
         <input
           type="text"
           placeholder={placeholder}
-          value={value}
+          // value={value}
+          ref={contentRef}
           className="bg-transparent outline-none text-[#bdbdbd] placeholder:text-[#777] text-lg w-full"
-          onChange={(e) => onChange(e.target.value)}
+          // onChange={(e) => onChange(e.target.value)}
+          // onFocus={inputClick}
         />
 
         {/* Likes */}
         <div className="flex items-center gap-3">
           <button
             className="p-2 rounded-full hover:bg-white/10"
-            onClick={onAttach}
+            onClick={onAttach || inputClick}
           >
             <PlusCircleIcon className="w-6 h-6 cursor-pointer text-green-500" />
           </button>
 
           <button
             className="px-5 py-2 rounded-full cursor-pointer bg-green-600 hover:bg-green-700 text-white font-semibold"
-            onClick={onPost}
+            onClick={handleButtonClick}
             disabled={isPosting}
           >
             {isPosting ? "Posting..." : "Post"}

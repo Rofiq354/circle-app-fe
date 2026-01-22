@@ -1,4 +1,6 @@
 import api from "@/api/axios";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { fetchMe } from "@/store/auth/authThunk";
 import axios from "axios";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
@@ -10,6 +12,7 @@ type FormErrors = {
 };
 
 const RegisterPage = () => {
+  const dispatch = useAppDispatch();
   const [form, setForm] = useState({
     fullname: "",
     email: "",
@@ -36,44 +39,26 @@ const RegisterPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await api.post("/auth/register", payload);
-      const { token } = res.data.data;
-
-      localStorage.setItem("token", token);
-      console.log("Registrasi berhasil", res.data);
-      alert("Registrasi berhasil!");
-
+      await api.post("/auth/register", payload);
+      await dispatch(fetchMe());
       navigate("/");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const backendErrors = error.response?.data?.message;
 
-        if (typeof backendErrors === "object" && backendErrors !== null) {
+        if (typeof backendErrors === "object") {
           setErrors(backendErrors);
-          return;
-        }
-
-        if (typeof backendErrors === "string") {
+        } else if (typeof backendErrors === "string") {
           setErrors({ email: backendErrors });
-          console.error(error);
-          return;
         }
-
-        console.error(error);
-      } else {
-        console.error("Unexpected error:", error);
       }
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-
-    setErrors((prev) => ({
-      ...prev,
-      [name]: undefined,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   return (
@@ -132,7 +117,7 @@ const RegisterPage = () => {
 
         <button
           type="submit"
-          className="w-full cursor-pointer bg-green-500 hover:bg-green-600 text-black font-semibold py-2 rounded-full transition"
+          className="w-full cursor-pointer bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-full transition"
         >
           Create
         </button>

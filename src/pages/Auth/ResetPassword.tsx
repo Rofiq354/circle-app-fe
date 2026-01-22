@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
 
 const ResetPasswordPage = () => {
   const [form, setForm] = useState({ password: "", confirm_password: "" });
@@ -43,19 +42,11 @@ const ResetPasswordPage = () => {
 
         <button
           type="submit"
-          className="w-full cursor-pointer bg-green-500 hover:bg-green-600 text-black font-semibold py-2 rounded-full transition"
+          className="w-full cursor-pointer bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-full transition"
         >
           Create New Password
         </button>
       </form>
-
-      {/* Register */}
-      <p className="text-sm text-gray-400 mt-6">
-        Don't have an account yet?{" "}
-        <Link to="/auth/register" className="text-green-500 hover:underline">
-          Create account
-        </Link>
-      </p>
     </div>
   );
 };

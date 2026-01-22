@@ -1,69 +1,49 @@
-// import api from "@/api/axios";
 import api from "@/api/axios";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { fetchMe } from "@/store/auth/authThunk";
 import axios from "axios";
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 type FormErrors = {
-  fullname?: string;
   email?: string;
   password?: string;
 };
 
-export const LoginPage = () => {
-  const [form, setForm] = useState<FormErrors>({
+const LoginPage = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  const [form, setForm] = useState({
     email: "",
     password: "",
   });
-  const [errors, setErrors] = useState<FormErrors>({});
-  const navigate = useNavigate();
 
-  const payload = {
-    email: form.email,
-    password: form.password,
-  };
+  const [errors, setErrors] = useState<FormErrors>({});
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const res = await api.post("/auth/login", payload);
-      const { token } = res.data.data;
-
-      localStorage.setItem("token", token);
-      console.log("Login berhasil", res.data);
-      alert("Login berhasil!");
-
+      await api.post("/auth/login", form);
+      await dispatch(fetchMe());
       navigate("/");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         const backendErrors = error.response?.data?.message;
 
-        if (typeof backendErrors === "object" && backendErrors !== null) {
+        if (typeof backendErrors === "object") {
           setErrors(backendErrors);
-          return;
-        }
-
-        if (typeof backendErrors === "string") {
+        } else if (typeof backendErrors === "string") {
           setErrors({ email: backendErrors });
-          console.error(error);
-          return;
         }
-
-        // console.error(error);
-      } else {
-        console.error("Unexpected error:", error);
       }
     }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    setForm({ ...form, [name]: value });
-
-    setErrors((prev) => ({
-      ...prev,
-      [name]: undefined,
-    }));
+    setForm((prev) => ({ ...prev, [name]: value }));
+    setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
   return (
@@ -115,7 +95,7 @@ export const LoginPage = () => {
 
         <button
           type="submit"
-          className="w-full cursor-pointer bg-green-500 hover:bg-green-600 text-black font-semibold py-2 rounded-full transition"
+          className="w-full cursor-pointer bg-green-500 hover:bg-green-600 text-white font-semibold py-2 rounded-full transition"
         >
           Login
         </button>
