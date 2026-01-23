@@ -3,17 +3,20 @@ import type { User } from "./user";
 export interface Thread {
   id: number;
   content: string;
+
   images: string | null;
   image?: string;
+  image_url: null | string;
+
   user?: User;
-  created_at: string;
+  user_id: string;
+
   likes: number;
   replies: number;
   isLiked: boolean;
 
-  image_url: null | string;
+  created_at: string;
   timestamp: string;
-  user_id: string;
 }
 
 export interface Tweet {
@@ -52,8 +55,8 @@ export interface ThreadContextType {
   threads: Thread[];
   addThread?: (content: string) => void | object;
   loading: boolean;
-  refreshThreads: () => Promise<void>;
-  toggleLike: (threadId: number) => void;
+  refreshThreads?: () => Promise<void>;
+  toggleLike?: (threadId: number) => void;
 }
 
 export interface ThreadDialogProps {
@@ -68,12 +71,12 @@ export interface ThreadDialogProps {
 }
 
 export interface GetOneThreadById {
-  id: number,
-  content: string,
-  image?: string | null,
-  likes: number,
-  replies: number
-  created_at: string,
-  user?: User
-  isLiked?: boolean
+  id: number;
+  content: string;
+  image?: string | null;
+  likes: number;
+  replies: number;
+  created_at: string;
+  user?: User;
+  isLiked?: boolean;
 }

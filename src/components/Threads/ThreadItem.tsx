@@ -1,107 +1,119 @@
 import { timeAgo } from "@/lib/times";
+import type { AppDispatch, RootState } from "@/store";
+import { localToggleLike, toggleLikeAction } from "@/store/like/threadTuhnk";
 import type { ThreadItemProps } from "@/types/threads";
 import { HeartIcon, MessagesSquare, User } from "lucide-react";
-import { useState } from "react";
+import { memo, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-export const ThreadItem: React.FC<ThreadItemProps> = ({
-  id,
-  user,
-  content,
-  likes,
-  reply,
-  created_at,
-  images,
-  isLiked,
-  onLike,
-}) => {
-  const [isError, setIsError] = useState(false);
+export const ThreadItem: React.FC<ThreadItemProps> = memo(
+  ({ id, user, content, reply, created_at, images }) => {
+    const [isError, setIsError] = useState(false);
+    const dispatch = useDispatch<AppDispatch>();
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    // Tambahkan navigasi ke profile di sini jika perlu
-  };
+    const isLiked = useSelector(
+      (state: RootState) =>
+        state.threads.threads.find((t) => t.id === id)?.isLiked,
+    );
 
-  const imageIcon = (
-    <div className="w-10 h-10 rounded-full bg-[#333] flex items-center justify-center border border-[#444]">
-      <User size={20} className="text-[#777]" />
-    </div>
-  );
+    const likes = useSelector(
+      (state: RootState) =>
+        state.threads.threads.find((t) => t.id === id)?.likes,
+    );
 
-  return (
-    <div className="p-4 relative hover:bg-white/[0.02] transition">
-      <Link to={`/thread/${id}`}>
-        <div className="flex gap-3">
-          <div className="relative z-20 cursor-pointer" onClick={handleClick}>
-            {/* Cek jika src ada DAN tidak sedang error */}
-            {user?.photo_profile && !isError ? (
-              <img
-                src={user?.photo_profile as string}
-                alt="avatar"
-                className="w-10 h-10 rounded-full object-cover bg-[#333]"
-                onError={() => setIsError(true)} // Jika error, ubah state ke true
-              />
-            ) : (
-              imageIcon
-            )}
-          </div>
+    const handleClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+    };
 
-          <div className="flex-1">
-            <div className="flex items-center gap-2">
-              <span
-                className="font-bold text-white capitalize hover:underline"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                }}
-              >
-                {user?.fullname}
-              </span>
-              <span className="text-[#777] lowercase">@{user?.username}</span>
-              <span className="text-[#777]">• {timeAgo(created_at ?? "")}</span>
+    const toggleLike = () => {
+      dispatch(localToggleLike(id));
+      dispatch(toggleLikeAction(id));
+    };
+
+    const imageIcon = (
+      <div className="w-10 h-10 rounded-full bg-[#333] flex items-center justify-center border border-[#444]">
+        <User size={20} className="text-[#777]" />
+      </div>
+    );
+
+    return (
+      <div className="p-4 relative hover:bg-white/2 transition">
+        <Link to={`/thread/${id}`}>
+          <div className="flex gap-3">
+            <div className="relative z-20 cursor-pointer" onClick={handleClick}>
+              {/* Cek jika src ada DAN tidak sedang error */}
+              {user?.photo_profile && !isError ? (
+                <img
+                  src={user?.photo_profile as string}
+                  alt="avatar"
+                  className="w-10 h-10 rounded-full object-cover bg-[#333]"
+                  onError={() => setIsError(true)} // Jika error, ubah state ke true
+                />
+              ) : (
+                imageIcon
+              )}
             </div>
 
-            <p className="text-[#bfbfbf] mt-2">{content}</p>
-
-            {(images as string) && (
-              <div className="mt-3 w-4/5">
-                <img
-                  src={`${images as string}`}
-                  alt="thread image"
-                  className="rounded-xl w-full max-h-87.5 bg-white object-cover"
-                />
-              </div>
-            )}
-
-            <div className="flex items-center gap-6 mt-3">
-              <div
-                className="flex items-center gap-2 text-[#777] cursor-pointer group"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onLike?.(id as number);
-                }}
-              >
-                <HeartIcon
-                  className={`w-5 h-5 ${isLiked ? "text-red-500 fill-red-500 scale-110" : "text-[#777]"}`}
-                />
-                <span className={`${isLiked ? "text-white" : "text-[#777]"}`}>
-                  {likes}
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                <span
+                  className="font-bold text-white capitalize hover:underline"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                  }}
+                >
+                  {user?.fullname}
+                </span>
+                <span className="text-[#777] lowercase">@{user?.username}</span>
+                <span className="text-[#777]">
+                  • {timeAgo(created_at ?? "")}
                 </span>
               </div>
 
-              <div className="flex items-center gap-2 text-[#777]">
-                <MessagesSquare className="w-5 h-5" />
-                <span>{reply === 0 ? "" : reply} Replies</span>
+              <p className="text-[#bfbfbf] mt-2">{content}</p>
+
+              {(images as string) && (
+                <div className="mt-3 w-4/5">
+                  <img
+                    src={`${images as string}`}
+                    alt="thread image"
+                    className="rounded-xl w-full max-h-87.5 bg-white object-cover"
+                  />
+                </div>
+              )}
+
+              <div className="flex items-center gap-6 mt-3">
+                <div
+                  className="flex items-center gap-2 text-[#777] cursor-pointer group"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleLike();
+                  }}
+                >
+                  <HeartIcon
+                    className={`w-5 h-5 transition-transform active:scale-150 ${isLiked ? "fill-red-500 text-red-500 scale-110" : "text-[#777]"}`}
+                  />
+                  <span className={`${isLiked ? "text-white" : "text-[#777]"}`}>
+                    {likes}
+                  </span>
+                </div>
+
+                <div className="flex items-center gap-2 text-[#777]">
+                  <MessagesSquare className="w-5 h-5" />
+                  <span>{reply === 0 ? "" : reply} Replies</span>
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </Link>
-    </div>
-  );
-};
+        </Link>
+      </div>
+    );
+  },
+);
 
 export const ThreadSkeleton = () => {
   return (

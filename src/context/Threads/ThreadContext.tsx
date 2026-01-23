@@ -5,52 +5,38 @@ import ThreadDialog from "@/components/Threads/ThreadDialog";
 import { ModalThreadContext, ThreadContext } from "./createThreadContext";
 import toast from "react-hot-toast";
 import socket from "@/lib/socket";
+import { addSingleThread } from "@/store/like/threadTuhnk";
+import type { AppDispatch, RootState } from "@/store";
+import { useDispatch, useSelector } from "react-redux";
+import { setThreads as setThreadsRedux } from "@/store/like/threadTuhnk";
 
 export const ThreadProvider = ({ children }: { children: ReactNode }) => {
-  const [threads, setThreads] = useState<Thread[]>([]);
+  const dispatch = useDispatch<AppDispatch>();
+  const threads = useSelector((state: RootState) => state.threads.threads);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchThreads();
+    const fetchData = async () => {
+      try {
+        const data = await getAllThreads();
+        dispatch(setThreadsRedux(data));
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-    // LISTEN THREAD BARU
+    fetchData();
+
     socket.on("new-thread", (newThread: Thread) => {
-      setThreads((prev) => [newThread, ...prev]); // Tambah ke urutan paling atas
+      dispatch(addSingleThread(newThread));
     });
-
-    // LISTEN UPDATE LIKE
-    // socket.on(
-    //   "update-like",
-    //   (data: { threadId: number; likesCount: number }) => {
-    //     setThreads((prev) =>
-    //       prev.map((t) =>
-    //         t.id === data.threadId ? { ...t, likes: data.likesCount } : t,
-    //       ),
-    //     );
-    //   },
-    // );
 
     return () => {
       socket.off("new-thread");
-      // socket.off("update-like");
     };
-  }, []);
-
-  const fetchThreads = async () => {
-    setLoading(true);
-    try {
-      const data = await getAllThreads();
-      setTimeout(() => {
-        setThreads(data);
-      }, 500);
-    } catch (error) {
-      console.error("Fetch threads gagal", error);
-    } finally {
-      setTimeout(() => {
-        setLoading(false);
-      }, 1000);
-    }
-  };
+  }, [dispatch]);
 
   const addThread = async (content: string) => {
     try {
@@ -69,33 +55,16 @@ export const ThreadProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  // Optimistic update (tanpa API dulu)
-  const toggleLike = (threadId: number) => {
-    setThreads((prev) =>
-      prev.map((thread) =>
-        thread.id === threadId
-          ? {
-              ...thread,
-              isLiked: !thread.isLiked,
-              likes: thread.isLiked ? thread.likes - 1 : thread.likes + 1,
-            }
-          : thread,
-      ),
-    );
-  };
-
   return (
-    <ThreadContext
+    <ThreadContext.Provider
       value={{
         threads,
         addThread,
         loading,
-        refreshThreads: fetchThreads,
-        toggleLike,
       }}
     >
       {children}
-    </ThreadContext>
+    </ThreadContext.Provider>
   );
 };
 

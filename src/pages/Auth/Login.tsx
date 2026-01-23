@@ -75,6 +75,7 @@ const LoginPage = () => {
             type="password"
             name="password"
             value={form.password}
+            autoComplete="true"
             onChange={handleChange}
             placeholder="Password *"
             className={`w-full px-4 py-2 rounded-md bg-[#1f1f1f] text-white border ${errors.password ? "border-red-500" : "border-gray-700"} focus:outline-none focus:ring-2 focus:ring-green-500`}
