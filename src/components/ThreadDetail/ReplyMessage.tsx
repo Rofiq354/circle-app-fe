@@ -12,19 +12,25 @@ const ReplyMessage: React.FC<ThreadComposerProps> = ({
 }) => {
   const contentRef = useRef<HTMLInputElement>(null);
 
-  const handleButtonClick = () => {
-    try {
-      const val = contentRef.current?.value || "";
-      onPost?.(val); // Kirim value ke parent
-      if (contentRef.current) contentRef.current.value = ""; // Reset input setelah klik
-    } catch (error) {
-      console.error("Error when handling button click:", error);
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault(); // Mencegah reload halaman
+
+    const val = contentRef.current?.value.trim() || "";
+
+    if (val) {
+      onPost?.(val);
+      if (contentRef.current) contentRef.current.value = ""; // Reset input
     }
   };
 
   return (
-    <div className={`w-full border-b border-[#333] bg-[#1d1d1d] sticky top-0 px-7 ${className}`}>
-      <div className="flex items-center gap-3 w-full my-6">
+    <div
+      className={`w-full border-b border-[#333] bg-[#1d1d1d] sticky top-0 px-7 ${className}`}
+    >
+      <form
+        onSubmit={handleSubmit}
+        className="flex items-center gap-3 w-full my-6"
+      >
         <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-700">
           <img
             src="https://i.pravatar.cc/40"
@@ -36,13 +42,17 @@ const ReplyMessage: React.FC<ThreadComposerProps> = ({
         <input
           type="text"
           placeholder={placeholder}
+          disabled={isPosting}
           ref={contentRef}
+          id="content"
+          name="content"
           className="bg-transparent outline-none text-[#bdbdbd] placeholder:text-[#777] text-lg w-full"
         />
 
         {/* Likes */}
         <div className="flex items-center gap-3">
           <button
+            type="button"
             className="p-2 rounded-full hover:bg-white/10"
             onClick={onAttach || inputClick}
           >
@@ -50,14 +60,14 @@ const ReplyMessage: React.FC<ThreadComposerProps> = ({
           </button>
 
           <button
+            type="submit"
             className="px-5 py-2 rounded-full cursor-pointer bg-green-600 hover:bg-green-700 text-white font-semibold"
-            onClick={handleButtonClick}
             disabled={isPosting}
           >
             {isPosting ? "Replying..." : "Reply"}
           </button>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

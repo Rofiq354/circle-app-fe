@@ -1,12 +1,10 @@
-import { io } from "socket.io-client";
 import { useEffect, useState, type ReactNode } from "react";
 import { createThread, getAllThreads } from "@/services/thread.service";
 import type { Thread } from "@/types/threads";
 import ThreadDialog from "@/components/Threads/ThreadDialog";
 import { ModalThreadContext, ThreadContext } from "./createThreadContext";
 import toast from "react-hot-toast";
-
-const socket = io("http://localhost:3003", { transports: ["websocket"] });
+import socket from "@/lib/socket";
 
 export const ThreadProvider = ({ children }: { children: ReactNode }) => {
   const [threads, setThreads] = useState<Thread[]>([]);
@@ -60,27 +58,6 @@ export const ThreadProvider = ({ children }: { children: ReactNode }) => {
       formData.append("content", content);
 
       const response = await createThread(formData);
-
-      const newThread: Thread = {
-        id: response.data.tweet.id,
-        content,
-        images: null,
-        created_at: response.data.tweet.timestamp,
-        likes: 0,
-        replies: 0,
-        isLiked: false,
-        user: {
-          id: Number(response.data.tweet.user_id),
-          email: String(response.data.tweet.user?.email),
-          username: String(response.data.tweet.user?.username),
-          fullname: String(response.data.tweet.user?.fullname),
-          profile_picture:
-            response.data.tweet.user?.profile_picture ??
-            "https://i.pravatar.cc/40",
-        },
-      };
-
-      setThreads((prev) => [newThread, ...prev]);
 
       if (response.status === "success") {
         toast.success(response.message);

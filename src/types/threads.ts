@@ -1,15 +1,19 @@
-import type { User, UserProps } from "./user";
+import type { User } from "./user";
 
 export interface Thread {
   id: number;
   content: string;
   images: string | null;
   image?: string;
-  user: User;
+  user?: User;
   created_at: string;
   likes: number;
   replies: number;
   isLiked: boolean;
+
+  image_url: null | string;
+  timestamp: string;
+  user_id: string;
 }
 
 export interface Tweet {
@@ -25,7 +29,7 @@ export interface ThreadItemProps {
   id: number;
   content?: string;
   images?: string[] | string | null | undefined;
-  user: UserProps;
+  user?: User;
   likes: number;
   reply?: number;
   created_at?: string;

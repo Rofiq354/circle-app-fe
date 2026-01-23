@@ -23,10 +23,7 @@ const Threads: React.FC = () => {
   return (
     <div className="w-full bg-[#1d1d1d] relative">
       <ModalThreadProvider>
-        <ThreadComposer
-          onPost={handlePost}
-          isPosting={isPosting}
-        />
+        <ThreadComposer onPost={handlePost} isPosting={isPosting} />
       </ModalThreadProvider>
 
       {loading ? (

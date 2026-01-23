@@ -40,6 +40,6 @@ export const getThreadById = async (id: number): Promise<Thread> => {
 export const createThread = async (
   formData: FormData,
 ): Promise<CreateThreadsResponse> => {
-  const res = await api.post("/thread", formData);
+  const res = await api.post<CreateThreadsResponse>("/thread", formData);
   return res.data;
 };

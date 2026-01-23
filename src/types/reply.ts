@@ -8,7 +8,9 @@ export interface Reply {
 
   image?: string;
   images?: string[];
+  image_url?: string;
 
+  timestamp?: string;
   createdAt?: string;
   created_at?: string;
 
@@ -16,7 +18,8 @@ export interface Reply {
   updated_at?: string;
 
   userId?: number;
-  user: User;
+  user_id?: number;
+  user?: User;
 
   threadId?: number;
 }

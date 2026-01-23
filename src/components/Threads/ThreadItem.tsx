@@ -1,5 +1,7 @@
+import { timeAgo } from "@/lib/times";
 import type { ThreadItemProps } from "@/types/threads";
-import { HeartIcon, MessagesSquare } from "lucide-react";
+import { HeartIcon, MessagesSquare, User } from "lucide-react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 export const ThreadItem: React.FC<ThreadItemProps> = ({
@@ -13,52 +15,59 @@ export const ThreadItem: React.FC<ThreadItemProps> = ({
   isLiked,
   onLike,
 }) => {
-  const timeAgo = (dateString: string) => {
-    const now = new Date();
-    const date = new Date(dateString);
-    const diff = now.getTime() - date.getTime();
+  const [isError, setIsError] = useState(false);
 
-    const seconds = Math.floor(diff / 1000);
-    const minutes = Math.floor(diff / (1000 * 60));
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
-
-    if (seconds < 60) return `${seconds} detik yang lalu`;
-    if (minutes < 60) return `${minutes} menit yang lalu`;
-    if (hours < 24) return `${hours} jam yang lalu`;
-    if (days < 7) return `${days} hari yang lalu`;
-
-    return date.toLocaleDateString("id-ID", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // Tambahkan navigasi ke profile di sini jika perlu
   };
+
+  const imageIcon = (
+    <div className="w-10 h-10 rounded-full bg-[#333] flex items-center justify-center border border-[#444]">
+      <User size={20} className="text-[#777]" />
+    </div>
+  );
+
   return (
-    <div className="border-b border-[#333] p-4 hover:bg-[#2a2a2a]">
+    <div className="p-4 relative hover:bg-white/[0.02] transition">
       <Link to={`/thread/${id}`}>
         <div className="flex gap-3">
-          <img
-            src={user.profile_picture}
-            alt="avatar"
-            className="w-10 h-10 rounded-full bg-white"
-          />
+          <div className="relative z-20 cursor-pointer" onClick={handleClick}>
+            {/* Cek jika src ada DAN tidak sedang error */}
+            {user?.photo_profile && !isError ? (
+              <img
+                src={user?.photo_profile as string}
+                alt="avatar"
+                className="w-10 h-10 rounded-full object-cover bg-[#333]"
+                onError={() => setIsError(true)} // Jika error, ubah state ke true
+              />
+            ) : (
+              imageIcon
+            )}
+          </div>
 
           <div className="flex-1">
             <div className="flex items-center gap-2">
-              <span className="font-bold text-white capitalize">
-                {user.fullname}
+              <span
+                className="font-bold text-white capitalize hover:underline"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                }}
+              >
+                {user?.fullname}
               </span>
-              <span className="text-[#777] lowercase">@{user.username}</span>
+              <span className="text-[#777] lowercase">@{user?.username}</span>
               <span className="text-[#777]">• {timeAgo(created_at ?? "")}</span>
             </div>
 
             <p className="text-[#bfbfbf] mt-2">{content}</p>
 
-            {images && (
+            {(images as string) && (
               <div className="mt-3 w-4/5">
                 <img
-                  src={`${images}`}
+                  src={`${images as string}`}
                   alt="thread image"
                   className="rounded-xl w-full max-h-87.5 bg-white object-cover"
                 />
@@ -67,8 +76,12 @@ export const ThreadItem: React.FC<ThreadItemProps> = ({
 
             <div className="flex items-center gap-6 mt-3">
               <div
-                className="flex items-center gap-2 text-[#777] cursor-pointer"
-                onClick={() => onLike?.(id as number)}
+                className="flex items-center gap-2 text-[#777] cursor-pointer group"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onLike?.(id as number);
+                }}
               >
                 <HeartIcon
                   className={`w-5 h-5 ${isLiked ? "text-red-500 fill-red-500 scale-110" : "text-[#777]"}`}

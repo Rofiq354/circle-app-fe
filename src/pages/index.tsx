@@ -1,6 +1,4 @@
-import {
-  ThreadProvider,
-} from "@/context/Threads/ThreadContext";
+import { ThreadProvider } from "@/context/Threads/ThreadContext";
 import Sidebar from "@/layouts/Sidebar";
 import { Toaster } from "react-hot-toast";
 import { Outlet } from "react-router-dom";
@@ -11,30 +9,33 @@ const MainPage = () => {
       <Sidebar />
 
       <main className="h-full overflow-y-auto custom-scroll border-r border-[#333] bg-[#1d1d1d] translate-y-3.5">
-        <ThreadProvider>
-          <Outlet />
-        </ThreadProvider>
+        <div className="w-[95%] md:w-[90%] lg:w-[85%] 2xl:w-full max-w-[50rem] mx-auto">
+          <ThreadProvider>
+            <Outlet />
+          </ThreadProvider>
+        </div>
       </main>
 
       {/* 3. Sidebar Kanan (Lebih Lebar - 400px) */}
-      <aside className="bg-[#141414] text-white p-6 hidden 2xl:block overflow-y-auto custom-scroll">  
+      <aside className="bg-[#141414] text-white p-6 hidden 2xl:block overflow-y-auto custom-scroll">
         {/* Profile Card yang lebih lega */}
         <div className="rounded-2xl bg-[#1f1f1f] p-6 border border-[#333] shadow-xl">
           <div className="flex flex-col items-center">
             <div className="w-24 h-24 rounded-full bg-linear-to-tr from-yellow-400 to-orange-500 p-1 mb-4">
-               <img 
-                src="https://i.pravatar.cc/150?img=32" 
-                className="w-full h-full rounded-full object-cover border-4 border-[#1f1f1f]" 
+              <img
+                src="https://i.pravatar.cc/150?img=32"
+                className="w-full h-full rounded-full object-cover border-4 border-[#1f1f1f]"
                 alt="profile"
-               />
+              />
             </div>
             <h2 className="text-xl font-bold">Indah Pra Karya</h2>
             <p className="text-[#777] text-sm">@indahpra</p>
-            
+
             <p className="text-center text-gray-300 mt-4 text-sm leading-relaxed">
-              Software Engineer & Tech Enthusiast. Suka berbagi cerita tentang finansial dan coding.
+              Software Engineer & Tech Enthusiast. Suka berbagi cerita tentang
+              finansial dan coding.
             </p>
-            
+
             <div className="flex gap-6 mt-6 w-full border-t border-[#333] pt-4 justify-around">
               <div className="text-center">
                 <p className="font-bold text-white">1.2k</p>
@@ -57,7 +58,10 @@ const MainPage = () => {
           <h2 className="font-bold mb-4 text-lg">Who to follow</h2>
           {/* List item dummy */}
           {[1, 2].map((i) => (
-            <div key={i} className="flex items-center justify-between mb-4 last:mb-0">
+            <div
+              key={i}
+              className="flex items-center justify-between mb-4 last:mb-0"
+            >
               <div className="flex gap-3">
                 <div className="w-10 h-10 rounded-full bg-gray-600" />
                 <div>
@@ -65,7 +69,9 @@ const MainPage = () => {
                   <p className="text-xs text-[#777]">@user_{i}</p>
                 </div>
               </div>
-              <button className="bg-white text-black text-xs font-bold px-4 py-1.5 rounded-full">Follow</button>
+              <button className="bg-white text-black text-xs font-bold px-4 py-1.5 rounded-full">
+                Follow
+              </button>
             </div>
           ))}
         </div>
@@ -77,5 +83,3 @@ const MainPage = () => {
 };
 
 export default MainPage;
-
-
