@@ -1,18 +1,23 @@
 import { useEffect, useState, type ReactNode } from "react";
 import { createThread, getAllThreads } from "@/services/thread.service";
 import type { Thread } from "@/types/threads";
-import ThreadDialog from "@/components/Threads/ThreadDialog";
-import { ModalThreadContext, ThreadContext } from "./createThreadContext";
+import { ThreadContext } from "./createThreadContext";
 import toast from "react-hot-toast";
 import socket from "@/lib/socket";
-import { addSingleThread } from "@/store/like/threadTuhnk";
-import type { AppDispatch, RootState } from "@/store";
+import {
+  addSingleThread,
+  incrementReplyCount,
+  selectAllThreads,
+  updateLikesFromSocket,
+} from "@/store/like/threadSlice";
+import type { AppDispatch } from "@/store";
 import { useDispatch, useSelector } from "react-redux";
-import { setThreads as setThreadsRedux } from "@/store/like/threadTuhnk";
+import { setThreads as setThreadsRedux } from "@/store/like/threadSlice";
+import type { Reply } from "@/types/reply";
 
 export const ThreadProvider = ({ children }: { children: ReactNode }) => {
   const dispatch = useDispatch<AppDispatch>();
-  const threads = useSelector((state: RootState) => state.threads.threads);
+  const threads = useSelector(selectAllThreads);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -33,8 +38,23 @@ export const ThreadProvider = ({ children }: { children: ReactNode }) => {
       dispatch(addSingleThread(newThread));
     });
 
+    socket.on("new-reply", (newReply: Reply) => {
+      dispatch(incrementReplyCount(Number(newReply.threadId)));
+
+      // dispatch(addReply(newReply));
+    });
+
+    socket.on(
+      "update-like",
+      (data: { threadId: number; likesCount: number }) => {
+        dispatch(updateLikesFromSocket(data));
+      },
+    );
+
     return () => {
       socket.off("new-thread");
+      socket.off("update-like");
+      socket.off("new-reply");
     };
   }, [dispatch]);
 
@@ -65,28 +85,5 @@ export const ThreadProvider = ({ children }: { children: ReactNode }) => {
     >
       {children}
     </ThreadContext.Provider>
-  );
-};
-
-export interface ModalThreadProviderType {
-  openModal: () => void;
-  closeModal: () => void;
-}
-
-export const ModalThreadProvider = ({ children }: { children: ReactNode }) => {
-  const [isOpen, setIsOpen] = useState(false);
-
-  // Fungsi kendali
-  const openModal = () => setIsOpen(true);
-
-  const closeModal = () => {
-    setIsOpen(false);
-  };
-
-  return (
-    <ModalThreadContext value={{ openModal, closeModal }}>
-      {children}
-      <ThreadDialog isOpen={isOpen} onClose={closeModal} />
-    </ModalThreadContext>
   );
 };

@@ -1,44 +1,71 @@
 import React, { useEffect, useState } from "react";
-import { ArrowLeft, Heart as HeartIcon, MessagesSquare } from "lucide-react";
+import {
+  ArrowLeft,
+  Heart as HeartIcon,
+  MessagesSquare,
+  User,
+} from "lucide-react";
 import { Link } from "react-router-dom";
 import { getThreadById } from "@/services/thread.service";
-import type { GetOneThreadById } from "@/types/threads";
 import { formatTwitterDate } from "@/lib/times";
+import { useDispatch, useSelector } from "react-redux";
+import type { AppDispatch, RootState } from "@/store";
+import {
+  addSingleThread,
+  localToggleLike,
+  selectThreadById,
+  selectThreadImage,
+} from "@/store/like/threadSlice";
+import toast from "react-hot-toast";
+import { toggleLikeAction } from "@/store/like/threadThunk";
 
 interface DetailThreadProps {
   dataId?: string;
 }
 
 const DetailThread: React.FC<DetailThreadProps> = ({ dataId }) => {
-  const [getThread, setGetThread] = useState<GetOneThreadById | null>(null);
+  const dispatch = useDispatch<AppDispatch>();
+  const imageUrl = useSelector((state: RootState) =>
+    selectThreadImage(state, Number(dataId)),
+  );
+  const [imageError, setImageError] = useState(false);
+
+  const getThread = useSelector((state: RootState) =>
+    selectThreadById(state, Number(dataId)),
+  );
 
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const result = await getThreadById(Number(dataId));
+    if (!getThread) {
+      const fetchData = async () => {
+        try {
+          const result = await getThreadById(Number(dataId));
+          dispatch(addSingleThread(result));
+        } catch (error) {
+          console.error("Gagal mengambil detail thread:", error);
+          toast.error("Gagal mengambil detail thread");
+        }
+      };
 
-        const dataThread = {
-          id: Number(result.id),
-          content: result.content,
-          image: result.image ?? "",
-          // "https://picsum.photos/id/10/1000/600"
-          likes: Number(result.likes),
-          replies: Number(result.replies),
-          created_at: result.created_at,
-          user: result.user,
-          isLiked: false,
-        };
+      fetchData();
+    }
+  }, [dataId, getThread, dispatch]);
 
-        setGetThread(dataThread);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+  const handleLike = () => {
+    dispatch(localToggleLike(Number(dataId)));
+    dispatch(toggleLikeAction(Number(dataId)));
+  };
 
-    fetchData();
-  }, [dataId]);
+  const profileUrl =
+    getThread?.user.profile_picture || getThread?.user.photo_profile;
+
+  if (!getThread) return <div>Loading...</div>;
 
   const { time, dayMonthYear } = formatTwitterDate(getThread?.created_at ?? "");
+  const imageIcon = (
+    <div className="w-full h-full rounded-full bg-[#333] flex items-center justify-center border border-[#444]">
+      <User size={20} className="text-[#777]" />
+    </div>
+  );
 
   return (
     <div className="w-full bg-[#1d1d1d]">
@@ -55,18 +82,20 @@ const DetailThread: React.FC<DetailThreadProps> = ({ dataId }) => {
         {/* User Info Section */}
         <div className="flex items-center gap-3 mb-4">
           <div className="w-12 h-12 rounded-full overflow-hidden shrink-0">
-            <img
-              src={
-                getThread?.user?.profile_picture ||
-                "https://i.pravatar.cc/100?img=32"
-              }
-              alt="Indah Pra Karya"
-              className="w-full h-full object-cover"
-            />
+            {profileUrl && !imageError ? (
+              <img
+                src={profileUrl as string}
+                alt="Indah Pra Karya"
+                className="w-full h-full object-cover"
+                onError={() => setImageError(true)}
+              />
+            ) : (
+              imageIcon
+            )}
           </div>
           <div className="flex flex-col">
             <span className="font-medium text-lg hover:underline cursor-pointer text-white">
-              {getThread?.user?.name}
+              {getThread?.user?.name || getThread?.user?.fullname}
             </span>
             <span className="text-gray-500 text-[15px] lowercase">
               @{getThread?.user?.username}
@@ -81,10 +110,10 @@ const DetailThread: React.FC<DetailThreadProps> = ({ dataId }) => {
           </p>
         </div>
 
-        {getThread?.image && (
+        {imageUrl && (
           <div className="mt-3 w-4/5">
             <img
-              src={getThread?.image}
+              src={imageUrl}
               alt="thread image"
               className="rounded-xl w-full max-h-87.5 bg-white object-cover border border-[#333]"
             />
@@ -100,7 +129,10 @@ const DetailThread: React.FC<DetailThreadProps> = ({ dataId }) => {
 
         <div className="flex items-center gap-6 mt-3">
           {/* Like Button */}
-          <div className="flex items-center gap-2 text-[#777] cursor-pointer group">
+          <div
+            className="flex items-center gap-2 text-[#777] cursor-pointer group"
+            onClick={() => handleLike()}
+          >
             <HeartIcon
               className={`w-5 h-5 transition-transform active:scale-125 ${
                 getThread?.isLiked
@@ -118,9 +150,7 @@ const DetailThread: React.FC<DetailThreadProps> = ({ dataId }) => {
           {/* Reply Info */}
           <div className="flex items-center gap-2 text-[#777] cursor-pointer hover:text-blue-400 transition-colors">
             <MessagesSquare className="w-5 h-5" />
-            <span>
-              {getThread?.replies === 0 ? "" : getThread?.replies} Replies
-            </span>
+            <span>{getThread.reply === 0 ? "" : getThread.reply} Replies</span>
           </div>
         </div>
       </div>

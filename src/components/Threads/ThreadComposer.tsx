@@ -1,17 +1,16 @@
-import { useModalThread } from "@/hooks/useThread";
+import { useAppDispatch } from "@/hooks/useAppDispatch";
+import { openModal } from "@/store/like/threadSlice";
 import type { ThreadComposerProps } from "@/types/threads";
 import { PlusCircleIcon } from "lucide-react";
 import { useRef } from "react";
 
 const ThreadComposer: React.FC<ThreadComposerProps> = ({
   onPost,
-  onAttach,
-  inputClick,
   placeholder = "What is happening?!",
   isPosting,
   className = "",
 }) => {
-   const { openModal } = useModalThread();
+  const dispatch = useAppDispatch();
   const contentRef = useRef<HTMLInputElement>(null);
 
   const handleButtonClick = () => {
@@ -40,18 +39,17 @@ const ThreadComposer: React.FC<ThreadComposerProps> = ({
         <input
           type="text"
           placeholder={placeholder}
-          // value={value}
+          id="content"
+          name="content"
           ref={contentRef}
           className="bg-transparent outline-none text-[#bdbdbd] placeholder:text-[#777] text-lg w-full"
-          // onChange={(e) => onChange(e.target.value)}
-          // onFocus={inputClick}
         />
 
         {/* Likes */}
         <div className="flex items-center gap-3">
           <button
             className="p-2 rounded-full hover:bg-white/10"
-            onClick={onAttach || inputClick || openModal}
+            onClick={() => dispatch(openModal())}
           >
             <PlusCircleIcon className="w-6 h-6 cursor-pointer text-green-500" />
           </button>

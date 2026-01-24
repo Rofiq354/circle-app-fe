@@ -8,11 +8,12 @@ export interface Thread {
   image?: string;
   image_url: null | string;
 
-  user?: User;
+  user: User;
   user_id: string;
 
   likes: number;
   replies: number;
+  reply: number;
   isLiked: boolean;
 
   created_at: string;
@@ -43,7 +44,7 @@ export interface ThreadItemProps {
 export interface ThreadComposerProps {
   value?: string;
   onChange?: (value: string) => void;
-  onPost?: (name: string) => void;
+  onPost?: (content: string, image?: null | File) => void;
   inputClick?: () => void;
   onAttach?: () => void;
   placeholder?: string;

@@ -1,6 +1,7 @@
 import { timeAgo } from "@/lib/times";
 import type { AppDispatch, RootState } from "@/store";
-import { localToggleLike, toggleLikeAction } from "@/store/like/threadTuhnk";
+import { localToggleLike, selectThreadById } from "@/store/like/threadSlice";
+import { toggleLikeAction } from "@/store/like/threadThunk";
 import type { ThreadItemProps } from "@/types/threads";
 import { HeartIcon, MessagesSquare, User } from "lucide-react";
 import { memo, useState } from "react";
@@ -9,18 +10,14 @@ import { Link } from "react-router-dom";
 
 export const ThreadItem: React.FC<ThreadItemProps> = memo(
   ({ id, user, content, reply, created_at, images }) => {
+    const thread = useSelector((state: RootState) =>
+      selectThreadById(state, id),
+    );
     const [isError, setIsError] = useState(false);
     const dispatch = useDispatch<AppDispatch>();
 
-    const isLiked = useSelector(
-      (state: RootState) =>
-        state.threads.threads.find((t) => t.id === id)?.isLiked,
-    );
-
-    const likes = useSelector(
-      (state: RootState) =>
-        state.threads.threads.find((t) => t.id === id)?.likes,
-    );
+    const isLiked = thread?.isLiked;
+    const likes = thread?.likes;
 
     const handleClick = (e: React.MouseEvent) => {
       e.preventDefault();
@@ -43,13 +40,12 @@ export const ThreadItem: React.FC<ThreadItemProps> = memo(
         <Link to={`/thread/${id}`}>
           <div className="flex gap-3">
             <div className="relative z-20 cursor-pointer" onClick={handleClick}>
-              {/* Cek jika src ada DAN tidak sedang error */}
               {user?.photo_profile && !isError ? (
                 <img
                   src={user?.photo_profile as string}
                   alt="avatar"
                   className="w-10 h-10 rounded-full object-cover bg-[#333]"
-                  onError={() => setIsError(true)} // Jika error, ubah state ke true
+                  onError={() => setIsError(true)}
                 />
               ) : (
                 imageIcon

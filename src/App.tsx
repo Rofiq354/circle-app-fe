@@ -9,6 +9,7 @@ import MainPage from "./pages";
 import Threads from "./pages/Threads/Threads";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import ThreadDetailPage from "./pages/Threads/ThreadDetail";
+import DetailProfilePage from "./pages/Profile/DetailProfile";
 
 function App() {
   return (
@@ -25,8 +26,12 @@ function App() {
           {/* PROTECTED ROUTE */}
           <Route element={<ProtectedRoute />}>
             <Route path="/" element={<MainPage />}>
+              {/* Threads */}
               <Route index element={<Threads />} />
               <Route path="thread/:id" element={<ThreadDetailPage />} />
+
+              {/* Profile */}
+              <Route path="/profile" element={<DetailProfilePage />} />
             </Route>
           </Route>
         </Routes>

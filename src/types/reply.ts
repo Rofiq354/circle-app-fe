@@ -1,3 +1,4 @@
+import type { Thread } from "./threads";
 import type { User } from "./user";
 
 export interface Reply {
@@ -6,9 +7,9 @@ export interface Reply {
   content?: string;
   message?: string;
 
-  image?: string;
+  image?: string | null;
   images?: string[];
-  image_url?: string;
+  image_url?: string | null;
 
   timestamp?: string;
   createdAt?: string;
@@ -22,4 +23,5 @@ export interface Reply {
   user?: User;
 
   threadId?: number;
+  threads: Thread;
 }

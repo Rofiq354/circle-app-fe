@@ -2,14 +2,13 @@ import ThreadComposer from "@/components/Threads/ThreadComposer";
 import { ThreadItem, ThreadSkeleton } from "@/components/Threads/ThreadItem";
 import { useState } from "react";
 import { useThread } from "@/hooks/useThread";
-import { ModalThreadProvider } from "@/context/Threads/ThreadContext";
 import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { selectAllThreads } from "@/store/like/threadSlice";
 
 const Threads: React.FC = () => {
   const { loading, addThread } = useThread();
   const [isPosting, setIsPosting] = useState(false);
-  const threads = useSelector((state: RootState) => state.threads.threads);
+  const threads = useSelector(selectAllThreads);
 
   const handlePost = (content: string) => {
     setIsPosting(true);
@@ -25,9 +24,7 @@ const Threads: React.FC = () => {
 
   return (
     <div className="w-full bg-[#1d1d1d] relative">
-      <ModalThreadProvider>
-        <ThreadComposer onPost={handlePost} isPosting={isPosting} />
-      </ModalThreadProvider>
+      <ThreadComposer onPost={handlePost} isPosting={isPosting} />
 
       {loading ? (
         <ThreadSkeleton />

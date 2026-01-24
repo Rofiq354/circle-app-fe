@@ -5,6 +5,5 @@ import {
 } from "react-redux";
 import type { AppDispatch, RootState } from "@/store";
 
-// versi typed dari hook redux
 export const useAppDispatch: () => AppDispatch = useDispatch;
 export const useAppSelector: TypedUseSelectorHook<RootState> = useSelector;

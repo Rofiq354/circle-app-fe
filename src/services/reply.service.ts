@@ -23,11 +23,11 @@ export const getAllRepliesByThreadId = async (
 
 export const createRepliesByThreadId = async (
   thread_id: number,
-  content: string,
+  formData: FormData,
 ): Promise<Reply> => {
   const res = await api.post<GetThreadsResponse>(
     `/reply?thread_id=${thread_id}`,
-    { content },
+    formData,
   );
   return res.data.data.tweet;
 };

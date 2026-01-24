@@ -12,9 +12,9 @@ export interface User {
   name?: string;
 
   username?: string;
-  
-  profile_picture?: string;
-  photo_profile?: string;
+
+  profile_picture?: string | null;
+  photo_profile?: string | null;
 
   email?: string;
 }

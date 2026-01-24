@@ -1,7 +1,6 @@
-import { ModalThreadProvider } from "@/context/Threads/ThreadContext";
 import { useAppDispatch } from "@/hooks/useAppDispatch";
-import { useModalThread } from "@/hooks/useThread";
 import { authLogout } from "@/store/auth/authThunk";
+import { openModal } from "@/store/like/threadSlice";
 import {
   CircleUser,
   HomeIcon,
@@ -41,19 +40,16 @@ const Sidebar: React.FC = () => {
             <span className="text-sm font-medium">{item.name}</span>
           </button>
         ))}
-        <ModalThreadProvider>
-          <ButtonCreateThread />
-        </ModalThreadProvider>
+        <ButtonCreateThread />
       </div>
 
       {/* Section Akun (Profile + Logout) */}
       <div className="mt-auto flex flex-col gap-2">
-        
         {/* Profile Info Ringkas */}
         <div className="flex items-center gap-3 px-4 py-3 mb-2 2xl:hidden border-t border-[#333] pt-5">
-          <img 
-            src="https://i.pravatar.cc/150?img=32" 
-            className="w-9 h-9 rounded-full object-cover border border-[#444]" 
+          <img
+            src="https://i.pravatar.cc/150?img=32"
+            className="w-9 h-9 rounded-full object-cover border border-[#444]"
             alt="profile"
           />
           <div className="flex flex-col overflow-hidden">
@@ -76,15 +72,15 @@ const Sidebar: React.FC = () => {
 };
 
 const ButtonCreateThread = () => {
-   const { openModal } = useModalThread();
+  const dispatch = useAppDispatch();
   return (
     <button
-      onClick={openModal}
+      onClick={() => dispatch(openModal())}
       className="w-full py-3 cursor-pointer rounded-full bg-green-500 text-white font-bold hover:bg-green-600 transition"
     >
       Create Post
     </button>
   );
-}
+};
 
 export default Sidebar;
