@@ -94,9 +94,11 @@ const DetailThread: React.FC<DetailThreadProps> = ({ dataId }) => {
             )}
           </div>
           <div className="flex flex-col">
-            <span className="font-medium text-lg hover:underline cursor-pointer text-white">
-              {getThread?.user?.name || getThread?.user?.fullname}
-            </span>
+            <Link to={`/profile/${getThread?.user.username}`}>
+              <span className="font-medium text-lg hover:underline cursor-pointer text-white">
+                {getThread?.user?.name || getThread?.user?.fullname}
+              </span>
+            </Link>
             <span className="text-gray-500 text-[15px] lowercase">
               @{getThread?.user?.username}
             </span>

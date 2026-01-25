@@ -2,17 +2,44 @@ import api from "@/api/axios";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 
-export const fetchProfile = createAsyncThunk(
-  "profile/fetchProfile",
+export const fetchMyProfile = createAsyncThunk(
+  "profile/fetchMyProfile",
   async (_, { rejectWithValue }) => {
     try {
       const res = await api.get("/profile");
-      return res.data;
+      return res.data.data;
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 401) {
-          return rejectWithValue(err.response?.data);
+          return rejectWithValue(
+            err.response?.data || "Gagal memuat my profil",
+          );
         }
+      }
+      return rejectWithValue("Terjadi kesalahan sistem");
+    }
+  },
+);
+
+export const fetchProfile = createAsyncThunk(
+  "profile/fetchProfile",
+  async (username: string | undefined, { rejectWithValue }) => {
+    try {
+      if (!username || username === "undefined") {
+        return rejectWithValue(null);
+      }
+      const res = await api.get(`/profile/${username}`);
+      return res.data.data;
+    } catch (err: unknown) {
+      if (axios.isAxiosError(err)) {
+        if (err.response?.status === 401) {
+          return rejectWithValue(
+            err.response?.data || "Gagal mengambil profil",
+          );
+        }
+        return rejectWithValue(
+          err.response?.data?.message || "Gagal memuat profil",
+        );
       }
       return rejectWithValue("Terjadi kesalahan sistem");
     }
@@ -26,8 +53,7 @@ export const updateProfile = createAsyncThunk(
       const res = await api.patch("/profile", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      console.log(res.data.data);
-      return res.data.data; // Sesuaikan dengan struktur res backend kamu
+      return res.data;
     } catch (err: unknown) {
       if (axios.isAxiosError(err)) {
         if (err.response?.status === 500) {

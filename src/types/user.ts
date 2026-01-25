@@ -16,5 +16,15 @@ export interface User {
   profile_picture?: string | null;
   photo_profile?: string | null;
 
+  cover_photo: string | null;
+  following_count: number;
+  follower_count: number;
+  likes_count: number;
+  
+  threads_count: number;
+  threads: number;
+
+  bio: string | null;
+
   email?: string;
 }

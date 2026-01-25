@@ -31,7 +31,10 @@ function App() {
               <Route path="thread/:id" element={<ThreadDetailPage />} />
 
               {/* Profile */}
-              <Route path="/profile" element={<DetailProfilePage />} />
+              <Route
+                path="/profile/:username"
+                element={<DetailProfilePage />}
+              />
             </Route>
           </Route>
         </Routes>

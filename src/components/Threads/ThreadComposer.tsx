@@ -1,8 +1,10 @@
 import { useAppDispatch } from "@/hooks/useAppDispatch";
+import type { RootState } from "@/store";
 import { openModal } from "@/store/like/threadSlice";
 import type { ThreadComposerProps } from "@/types/threads";
 import { PlusCircleIcon } from "lucide-react";
 import { useRef } from "react";
+import { useSelector } from "react-redux";
 
 const ThreadComposer: React.FC<ThreadComposerProps> = ({
   onPost,
@@ -11,6 +13,7 @@ const ThreadComposer: React.FC<ThreadComposerProps> = ({
   className = "",
 }) => {
   const dispatch = useAppDispatch();
+  const userImage = useSelector((state: RootState) => state.profile.myProfile?.photo_profile);
   const contentRef = useRef<HTMLInputElement>(null);
 
   const handleButtonClick = () => {
@@ -30,7 +33,7 @@ const ThreadComposer: React.FC<ThreadComposerProps> = ({
       <div className="flex items-center gap-3 w-full my-6">
         <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-700">
           <img
-            src="https://i.pravatar.cc/40"
+            src={userImage || "https://i.pravatar.cc/150"}
             alt="avatar"
             className="w-full h-full object-cover bg-white"
           />

@@ -1,6 +1,8 @@
+import type { RootState } from "@/store";
 import type { ThreadComposerProps } from "@/types/threads";
 import { PlusCircleIcon } from "lucide-react";
 import { useRef, useState } from "react";
+import { useSelector } from "react-redux";
 
 const ReplyMessage: React.FC<ThreadComposerProps> = ({
   onPost,
@@ -8,6 +10,9 @@ const ReplyMessage: React.FC<ThreadComposerProps> = ({
   isPosting = false,
   className = "",
 }) => {
+  const userImage = useSelector(
+    (state: RootState) => state.profile.myProfile?.photo_profile,
+  );
   const [image, setImage] = useState<File | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLInputElement>(null);
@@ -31,15 +36,12 @@ const ReplyMessage: React.FC<ThreadComposerProps> = ({
 
   return (
     <div
-      className={`w-full border-b border-[#333] bg-[#1d1d1d] sticky top-0 px-7 ${className}`}
+      className={`w-full border-b border-[#333] bg-[#1d1d1d] py-6 sticky top-0 px-7 ${className}`}
     >
-      <form
-        onSubmit={handleSubmit}
-        className="flex items-center gap-3 w-full my-6"
-      >
+      <form onSubmit={handleSubmit} className="flex items-center gap-3 w-full">
         <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-700">
           <img
-            src="https://i.pravatar.cc/40"
+            src={userImage || "https://i.pravatar.cc/40"}
             alt="avatar"
             className="w-full h-full object-cover bg-white"
           />

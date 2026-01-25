@@ -6,10 +6,11 @@ import type { ThreadItemProps } from "@/types/threads";
 import { HeartIcon, MessagesSquare, User } from "lucide-react";
 import { memo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export const ThreadItem: React.FC<ThreadItemProps> = memo(
   ({ id, user, content, reply, created_at, images }) => {
+    const navigate = useNavigate();
     const thread = useSelector((state: RootState) =>
       selectThreadById(state, id),
     );
@@ -22,6 +23,7 @@ export const ThreadItem: React.FC<ThreadItemProps> = memo(
     const handleClick = (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      navigate(`/profile/${user?.username}`);
     };
 
     const toggleLike = () => {
@@ -56,10 +58,7 @@ export const ThreadItem: React.FC<ThreadItemProps> = memo(
               <div className="flex items-center gap-2">
                 <span
                   className="font-bold text-white capitalize hover:underline"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                  }}
+                  onClick={handleClick}
                 >
                   {user?.fullname}
                 </span>

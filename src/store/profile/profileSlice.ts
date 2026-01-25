@@ -1,5 +1,14 @@
-import { createSlice, type PayloadAction } from "@reduxjs/toolkit";
-import { fetchProfile, updateProfile } from "./profileThunk";
+import {
+  createSlice,
+  type PayloadAction,
+  type SerializedError,
+} from "@reduxjs/toolkit";
+import {
+  fetchMyProfile,
+  fetchProfile,
+  // toggleFollow,
+  updateProfile,
+} from "./profileThunk";
 
 export interface ProfileData {
   id: number;
@@ -12,19 +21,26 @@ export interface ProfileData {
   following_count: number;
   likes_count: number;
   threads_count: number;
+  isFollowed: boolean;
 }
 
 interface ProfileState {
-  data: ProfileData | null;
+  myProfile: ProfileData | null;
+  viewedProfile: ProfileData | null;
+  isSidebarVisible: boolean;
   isEditModalOpen: boolean;
-  loading: boolean;
+  isMyProfileLoading: boolean;
+  isViewedProfileLoading: boolean;
   error: string | null;
 }
 
 const initialState: ProfileState = {
-  data: null,
+  myProfile: null,
+  viewedProfile: null,
+  isSidebarVisible: true,
   isEditModalOpen: false,
-  loading: false,
+  isMyProfileLoading: false,
+  isViewedProfileLoading: false,
   error: null,
 };
 
@@ -32,25 +48,34 @@ const profileSlice = createSlice({
   name: "profile",
   initialState,
   reducers: {
-    setProfile: (state, action: PayloadAction<Partial<ProfileData>>) => {
-      if (state.data) {
-        state.data = { ...state.data, ...action.payload };
-      }
+    showSidebar: (state) => {
+      state.isSidebarVisible = true;
     },
-    updateFollowCount: (
-      state,
-      action: PayloadAction<{ type: "follow" | "unfollow" }>,
-    ) => {
-      if (state.data) {
-        if (action.payload.type === "follow") {
-          state.data.follower_count += 1;
-        } else {
-          state.data.follower_count -= 1;
+    hideSidebar: (state) => {
+      state.isSidebarVisible = false;
+    },
+    setProfile: (state, action: PayloadAction<ProfileData>) => {
+      state.viewedProfile = action.payload;
+    },
+    toggleFollowOptimistic: (state) => {
+      const target = state.viewedProfile;
+      const me = state.myProfile;
+
+      if (target) {
+        const isNowFollowing = !target.isFollowed;
+
+        // Update Target (Followers)
+        target.isFollowed = isNowFollowing;
+        target.follower_count += isNowFollowing ? 1 : -1;
+
+        // Update Saya (Following) - Sinkronisasi otomatis
+        if (me) {
+          me.following_count += isNowFollowing ? 1 : -1;
         }
       }
     },
     clearProfile: (state) => {
-      state.data = null;
+      state.viewedProfile = null;
       state.error = null;
     },
     openEditModal: (state) => {
@@ -62,41 +87,67 @@ const profileSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
+      // --- My Profile Section ---
+      .addCase(fetchMyProfile.pending, handleMyProfilePending)
+      .addCase(fetchMyProfile.fulfilled, (state, action) => {
+        state.isMyProfileLoading = false;
+        state.myProfile = action.payload;
+      })
+      .addCase(fetchMyProfile.rejected, handleRejected)
+
+      // --- Viewed Profile Section ---
       .addCase(fetchProfile.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+        handleViewedProfilePending(state);
+        state.viewedProfile = null;
       })
       .addCase(fetchProfile.fulfilled, (state, action) => {
-        state.loading = false;
-        // action.payload adalah result dari API di buat di thunk
-        state.data = action.payload;
+        state.isViewedProfileLoading = false;
+        state.viewedProfile = action.payload;
       })
-      .addCase(fetchProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      })
+      .addCase(fetchProfile.rejected, handleRejected)
 
-      // // Handle Update Profile
-      .addCase(updateProfile.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
+      // --- Update Profile Section ---
+      .addCase(updateProfile.pending, handleMyProfilePending)
       .addCase(updateProfile.fulfilled, (state, action) => {
-        state.loading = false;
-        state.data = action.payload;
+        state.isMyProfileLoading = false;
+        const updatedData = action.payload.data;
+        state.myProfile = updatedData;
+        if (state.viewedProfile?.id === updatedData.id) {
+          state.viewedProfile = updatedData;
+        }
       })
-      .addCase(updateProfile.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload as string;
-      });
+      .addCase(updateProfile.rejected, handleRejected);
   },
 });
 
+const handleMyProfilePending = (state: ProfileState) => {
+  state.isMyProfileLoading = true;
+  state.error = null;
+};
+
+const handleViewedProfilePending = (state: ProfileState) => {
+  state.isViewedProfileLoading = true;
+  state.error = null;
+};
+
+const handleRejected = (
+  state: ProfileState,
+  action: { payload?: unknown; error?: SerializedError },
+) => {
+  state.isMyProfileLoading = false;
+  state.isViewedProfileLoading = false;
+  if (action.payload) {
+    state.error = (action.payload as string) || "Terjadi kesalahan.";
+  }
+};
+
 export const {
+  showSidebar,
+  hideSidebar,
   setProfile,
-  updateFollowCount,
   clearProfile,
   openEditModal,
   closeEditModal,
+  toggleFollowOptimistic,
 } = profileSlice.actions;
 export default profileSlice.reducer;

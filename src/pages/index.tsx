@@ -2,16 +2,19 @@ import { ThreadProvider } from "@/context/Threads/ThreadContext";
 import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import Profile from "@/layouts/Profile";
 import Sidebar from "@/layouts/Sidebar";
-import { updateProfile } from "@/store/profile/profileThunk";
-import { Toaster } from "react-hot-toast";
-import { Outlet } from "react-router-dom";
+import { fetchMyProfile, updateProfile } from "@/store/profile/profileThunk";
+import toast, { Toaster } from "react-hot-toast";
+import { Outlet, useNavigate } from "react-router-dom";
 import EditProfileModal from "@/components/Profile/EditProfileModal";
 import { closeEditModal, openEditModal } from "@/store/profile/profileSlice";
 import ThreadDialog from "@/components/Threads/ThreadDialog";
-import { closeModal } from "@/store/like/threadSlice";
+import { closeModal, openModal } from "@/store/like/threadSlice";
+import { useEffect } from "react";
+import { HomeIcon, PlusCircleIcon, UserIcon } from "lucide-react";
+import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
 
 const MainPage = () => {
-  const { data: profile, isEditModalOpen } = useAppSelector(
+  const { myProfile, isEditModalOpen } = useAppSelector(
     (state) => state.profile,
   );
   const { isModalOpen: isThreadModalOpen } = useAppSelector(
@@ -19,29 +22,39 @@ const MainPage = () => {
   );
   const dispatch = useAppDispatch();
 
+  useEffect(() => {
+    dispatch(fetchMyProfile());
+  }, [dispatch]);
+
   const handleSaveProfile = async (formData: FormData) => {
     try {
-      await dispatch(updateProfile(formData)).unwrap();
+      const res = await dispatch(updateProfile(formData)).unwrap();
       dispatch(closeEditModal());
-      // Optional: Munculkan toast sukses
+      toast.success(res.message);
     } catch (error) {
-      alert(error);
+      toast.error(
+        error instanceof Error ? error.message : "Terjadi kesalahan.",
+      );
     }
   };
 
   return (
-    <div className="grid grid-cols-[auto_1fr] 2xl:grid-cols-[auto_1fr_520px] h-screen w-full bg-[#1d1d1d] overflow-hidden">
-      <Sidebar />
+    <div className="flex h-screen w-full bg-[#1d1d1d] overflow-hidden">
+      <div className="hidden sm:block shrink-0">
+        <Sidebar />
+      </div>
 
-      <main className="h-full overflow-y-auto custom-scroll border-r border-[#333] bg-[#1d1d1d] translate-y-3.5">
-        <div className="w-[95%] md:w-[90%] lg:w-[85%] 2xl:w-full max-w-200 mx-auto">
+      <main className="flex-1 h-full overflow-y-auto custom-scroll border-r border-[#333] bg-[#1d1d1d] pb-16 lg:pb-0">
+        <div className="w-full md:w-[95%] 2xl:w-full max-w-300 mx-auto py-5 px-4 md:px-8 sm:px-10">
           <ThreadProvider>
             <Outlet />
           </ThreadProvider>
         </div>
       </main>
 
-      <Profile onEditClick={() => dispatch(openEditModal())} />
+      <div className="hidden xl:block w-112.5 shrink-0">
+        <Profile onEditClick={() => dispatch(openEditModal())} />
+      </div>
 
       <Toaster position="top-center" reverseOrder={true} />
 
@@ -54,10 +67,47 @@ const MainPage = () => {
         key={isEditModalOpen ? "open" : "closed"}
         isOpen={isEditModalOpen}
         onClose={() => dispatch(closeEditModal())}
-        initialData={profile}
+        initialData={myProfile}
         onSave={handleSaveProfile}
       />
+
+      <BottomNav />
     </div>
+  );
+};
+
+const BottomNav = () => {
+  const dispatch = useAppDispatch();
+  const navigate = useNavigate();
+
+  return (
+    <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-[#1d1d1d] border-t border-[#333] px-6 py-3 z-50">
+      <div className="flex items-center justify-between max-w-md mx-auto">
+        <button onClick={() => navigate("/")} className="p-2 text-white">
+          <HomeIcon className="w-7 h-7" />
+        </button>
+        <button className="p-2 text-white">
+          <MagnifyingGlassIcon className="w-7 h-7" />
+        </button>
+        {/* Tombol Tengah (Create) biasanya dibuat lebih menonjol */}
+        <button
+          onClick={() => dispatch(openModal())}
+          className="p-2 text-green-500"
+        >
+          <PlusCircleIcon className="w-8 h-8" />
+        </button>
+        <button className="p-2 text-white">
+          <UserIcon className="w-7 h-7" />
+        </button>
+        <button className="p-2 text-white">
+          <img
+            src="https://i.pravatar.cc/150?img=32"
+            className="w-7 h-7 rounded-full border border-[#444]"
+            alt="profile"
+          />
+        </button>
+      </div>
+    </nav>
   );
 };
 

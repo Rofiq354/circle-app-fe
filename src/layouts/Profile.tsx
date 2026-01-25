@@ -1,80 +1,12 @@
-import type { RootState } from "@/store";
-import { useSelector } from "react-redux";
+import { useAppSelector } from "@/hooks/useAppDispatch";
+import { Link } from "react-router-dom";
 
 const Profile = ({ onEditClick }: { onEditClick: () => void }) => {
-  const { data: profile, loading } = useSelector(
-    (state: RootState) => state.profile,
-  );
-
-  if (loading) return <div>Loading...</div>;
-  if (!profile) return null;
+  const { isSidebarVisible } = useAppSelector((state) => state.profile);
   return (
-    <aside className="bg-[#141414] text-white p-6 hidden 2xl:block overflow-y-auto custom-scroll">
+    <aside className="bg-[#141414] h-full w-full text-white p-6  overflow-y-auto custom-scroll">
       {/* MY PROFILE CARD */}
-      <div className="rounded-2xl bg-[#1f1f1f] border border-[#333] shadow-xl overflow-hidden">
-        <h2 className="px-5 py-3 font-medium text-xl">My Profile</h2>
-
-        {/* Banner Section */}
-        <div className="relative mb-12 px-5">
-          {profile.cover_photo ? (
-            <img
-              src={profile.cover_photo}
-              className="h-24 w-full rounded-xl object-cover"
-            />
-          ) : (
-            <div className="h-24 w-full rounded-xl bg-linear-to-r from-[#53906a] via-[#e2e88a] to-[#f4b678]"></div>
-          )}
-
-          {/* Avatar Overlap */}
-          <div className="absolute -bottom-10 left-10">
-            <div className="w-20 h-20 rounded-full border-[5px] border-[#1f1f1f] overflow-hidden shadow-lg">
-              <img
-                src={
-                  profile.photo_profile || "https://i.pravatar.cc/150?img=32"
-                }
-                className="w-full h-full object-cover"
-                alt="profile"
-              />
-            </div>
-          </div>
-
-          {/* Button Edit Profile */}
-          <div className="absolute -bottom-12 right-5">
-            <button
-              onClick={onEditClick}
-              className="border border-green-600 text-green-600 cursor-pointer hover:bg-green-600 hover:text-white text-sm font-bold px-4 py-1.5 rounded-full transition-colors"
-            >
-              Edit Profile
-            </button>
-          </div>
-        </div>
-
-        {/* Profile Info Section */}
-        <div className="px-6 pt-2 pb-5">
-          {" "}
-          <div className="mt-2">
-            <h2 className="text-2xl font-bold flex items-center gap-1">
-              ✨ {profile.name} ✨
-            </h2>
-            <p className="text-[#777] my-1">@{profile.username}</p>
-
-            <p className="text-white text-lg leading-snug">{profile.bio}</p>
-
-            <div className="flex gap-4 mt-3">
-              <div className="flex gap-1 items-center">
-                <p className="font-bold text-white">
-                  {profile.following_count}
-                </p>
-                <p className="text-[#777]">Following</p>
-              </div>
-              <div className="flex gap-1 items-center">
-                <p className="font-bold text-white">{profile.follower_count}</p>
-                <p className="text-[#777]">Followers</p>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      {isSidebarVisible && <CardProfile onEditClick={onEditClick} />}
 
       {/* SUGGESTED FOR YOU */}
       <div className="mt-6 rounded-2xl bg-[#1f1f1f] p-5 border border-[#333]">
@@ -92,6 +24,89 @@ const Profile = ({ onEditClick }: { onEditClick: () => void }) => {
       {/* FOOTER */}
       <ProfileFooter />
     </aside>
+  );
+};
+
+const CardProfile = ({ onEditClick }: { onEditClick: () => void }) => {
+  const { myProfile, isMyProfileLoading } = useAppSelector(
+    (state) => state.profile,
+  );
+
+  if (isMyProfileLoading && !myProfile) {
+    return (
+      <div className="rounded-2xl bg-[#1f1f1f] border border-[#333] p-10 text-center text-gray-500">
+        Loading Profile...
+      </div>
+    );
+  }
+
+  if (!myProfile) return null;
+
+  const profile = myProfile;
+
+  return (
+    <div className="rounded-2xl bg-[#1f1f1f] border border-[#333] shadow-xl overflow-hidden">
+      <h2 className="px-5 py-3 font-medium text-xl">My Profile</h2>
+
+      {/* Banner Section */}
+      <div className="relative mb-12 px-5">
+        {profile.cover_photo ? (
+          <img
+            src={profile.cover_photo}
+            className="h-24 w-full rounded-xl object-cover"
+          />
+        ) : (
+          <div className="h-24 w-full rounded-xl bg-linear-to-r from-[#53906a] via-[#e2e88a] to-[#f4b678]"></div>
+        )}
+
+        {/* Avatar Overlap */}
+        <div className="absolute -bottom-10 left-10">
+          <div className="w-20 h-20 rounded-full border-[5px] border-[#1f1f1f] overflow-hidden shadow-lg">
+            <img
+              src={profile.photo_profile || "https://i.pravatar.cc/150?img=32"}
+              className="w-full h-full object-cover"
+              alt="profile"
+            />
+          </div>
+        </div>
+
+        {/* Button Edit Profile */}
+        <div className="absolute -bottom-12 right-5">
+          <button
+            onClick={onEditClick}
+            className="border border-green-600 text-green-600 cursor-pointer hover:bg-green-600 hover:text-white text-sm font-bold px-4 py-1.5 rounded-full transition-colors"
+          >
+            Edit Profile
+          </button>
+        </div>
+      </div>
+
+      {/* Profile Info Section */}
+      <div className="px-6 pt-2 pb-5">
+        {" "}
+        <div className="mt-2">
+          <Link to={`/profile/${profile.username}`}>
+            <h2 className="text-2xl font-bold flex items-center gap-1">
+              ✨ {profile.name} ✨
+            </h2>
+          </Link>
+          <p className="text-[#777] my-1">@{profile.username}</p>
+
+          <p className="text-white text-lg leading-snug">{profile.bio}</p>
+
+          <div className="flex gap-4 mt-3">
+            <div className="flex gap-1 items-center">
+              <p className="font-bold text-white">{profile.following_count}</p>
+              <p className="text-[#777]">Following</p>
+            </div>
+            <div className="flex gap-1 items-center">
+              <p className="font-bold text-white">{profile.follower_count}</p>
+              <p className="text-[#777]">Followers</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 
