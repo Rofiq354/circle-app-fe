@@ -33,7 +33,6 @@ export const getAllThreads = async (): Promise<Thread[]> => {
 
 export const getThreadById = async (id: number): Promise<Thread> => {
   const res = await api.get(`/thread/${id}`);
-  // return res.data.data.threads[0];
   return res.data.data;
 };
 
@@ -42,4 +41,9 @@ export const createThread = async (
 ): Promise<CreateThreadsResponse> => {
   const res = await api.post<CreateThreadsResponse>("/thread", formData);
   return res.data;
+};
+
+export const getThreadByUserId = async (userId: number): Promise<Thread[]> => {
+  const res = await api.get<GetThreadsResponse>(`/user/${userId}/threads`);
+  return res.data.data.threads;
 };

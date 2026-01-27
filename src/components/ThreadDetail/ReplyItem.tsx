@@ -2,6 +2,7 @@ import React, { memo } from "react";
 import { Heart as HeartIcon, MessagesSquare } from "lucide-react";
 import type { Reply } from "@/types/reply";
 import { timeAgo } from "@/lib/times";
+import { Link } from "react-router-dom";
 
 const ReplyItem: React.FC<Reply> = memo(
   ({ user, content, image, image_url, created_at }) => {
@@ -26,9 +27,11 @@ const ReplyItem: React.FC<Reply> = memo(
 
             <div className="flex-1">
               <div className="flex items-center gap-2">
-                <span className="font-medium text-white capitalize">
-                  {user?.fullname || user?.name || "Unknown User"}
-                </span>
+                <Link to={`/profile/${user?.username || "anonymous"}`}>
+                  <span className="font-medium text-white capitalize hover:underline">
+                    {user?.fullname || user?.name || "Unknown User"}
+                  </span>
+                </Link>
                 <span className="text-[#777] lowercase">
                   @{user?.username || "anonymous"}
                 </span>

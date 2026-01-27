@@ -41,7 +41,7 @@ export const ThreadItem: React.FC<ThreadItemProps> = memo(
       <div className="p-4 relative hover:bg-white/2 transition">
         <Link to={`/thread/${id}`}>
           <div className="flex gap-3">
-            <div className="relative z-20 cursor-pointer" onClick={handleClick}>
+            <div className="relative cursor-pointer" onClick={handleClick}>
               {user?.photo_profile && !isError ? (
                 <img
                   src={user?.photo_profile as string}

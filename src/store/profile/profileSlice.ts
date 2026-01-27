@@ -3,12 +3,7 @@ import {
   type PayloadAction,
   type SerializedError,
 } from "@reduxjs/toolkit";
-import {
-  fetchMyProfile,
-  fetchProfile,
-  // toggleFollow,
-  updateProfile,
-} from "./profileThunk";
+import { fetchMyProfile, updateProfile } from "./profileThunk";
 
 export interface ProfileData {
   id: number;
@@ -26,23 +21,24 @@ export interface ProfileData {
 
 interface ProfileState {
   myProfile: ProfileData | null;
-  viewedProfile: ProfileData | null;
   isSidebarVisible: boolean;
   isEditModalOpen: boolean;
   isMyProfileLoading: boolean;
-  isViewedProfileLoading: boolean;
   error: string | null;
 }
 
 const initialState: ProfileState = {
   myProfile: null,
-  viewedProfile: null,
   isSidebarVisible: true,
   isEditModalOpen: false,
   isMyProfileLoading: false,
-  isViewedProfileLoading: false,
   error: null,
 };
+
+interface ToggleFollowPayload {
+  userId: number;
+  isFollowing: boolean;
+}
 
 const profileSlice = createSlice({
   name: "profile",
@@ -54,28 +50,22 @@ const profileSlice = createSlice({
     hideSidebar: (state) => {
       state.isSidebarVisible = false;
     },
-    setProfile: (state, action: PayloadAction<ProfileData>) => {
-      state.viewedProfile = action.payload;
-    },
-    toggleFollowOptimistic: (state) => {
-      const target = state.viewedProfile;
+    toggleFollowOptimistic: (
+      state,
+      action: PayloadAction<ToggleFollowPayload>,
+    ) => {
+      const { isFollowing } = action.payload;
       const me = state.myProfile;
 
-      if (target) {
-        const isNowFollowing = !target.isFollowed;
-
-        // Update Target (Followers)
-        target.isFollowed = isNowFollowing;
-        target.follower_count += isNowFollowing ? 1 : -1;
-
-        // Update Saya (Following) - Sinkronisasi otomatis
-        if (me) {
-          me.following_count += isNowFollowing ? 1 : -1;
-        }
+      if (me) {
+        // Jika sebelumnya true (unfollow), angka following kita berkurang (-1)
+        // Jika sebelumnya false (follow), angka following kita bertambah (+1)
+        const adjustment = isFollowing ? -1 : 1;
+        me.following_count += adjustment;
       }
     },
-    clearProfile: (state) => {
-      state.viewedProfile = null;
+    clearProfileState: (state) => {
+      state.myProfile = null;
       state.error = null;
     },
     openEditModal: (state) => {
@@ -95,26 +85,11 @@ const profileSlice = createSlice({
       })
       .addCase(fetchMyProfile.rejected, handleRejected)
 
-      // --- Viewed Profile Section ---
-      .addCase(fetchProfile.pending, (state) => {
-        handleViewedProfilePending(state);
-        state.viewedProfile = null;
-      })
-      .addCase(fetchProfile.fulfilled, (state, action) => {
-        state.isViewedProfileLoading = false;
-        state.viewedProfile = action.payload;
-      })
-      .addCase(fetchProfile.rejected, handleRejected)
-
       // --- Update Profile Section ---
       .addCase(updateProfile.pending, handleMyProfilePending)
       .addCase(updateProfile.fulfilled, (state, action) => {
         state.isMyProfileLoading = false;
-        const updatedData = action.payload.data;
-        state.myProfile = updatedData;
-        if (state.viewedProfile?.id === updatedData.id) {
-          state.viewedProfile = updatedData;
-        }
+        state.myProfile = action.payload.data;
       })
       .addCase(updateProfile.rejected, handleRejected);
   },
@@ -125,17 +100,11 @@ const handleMyProfilePending = (state: ProfileState) => {
   state.error = null;
 };
 
-const handleViewedProfilePending = (state: ProfileState) => {
-  state.isViewedProfileLoading = true;
-  state.error = null;
-};
-
 const handleRejected = (
   state: ProfileState,
   action: { payload?: unknown; error?: SerializedError },
 ) => {
   state.isMyProfileLoading = false;
-  state.isViewedProfileLoading = false;
   if (action.payload) {
     state.error = (action.payload as string) || "Terjadi kesalahan.";
   }
@@ -144,8 +113,7 @@ const handleRejected = (
 export const {
   showSidebar,
   hideSidebar,
-  setProfile,
-  clearProfile,
+  clearProfileState,
   openEditModal,
   closeEditModal,
   toggleFollowOptimistic,

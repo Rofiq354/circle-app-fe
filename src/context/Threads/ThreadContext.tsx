@@ -22,13 +22,16 @@ export const ThreadProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     const fetchData = async () => {
+      setLoading(true);
       try {
         const data = await getAllThreads();
         dispatch(setThreadsRedux(data));
       } catch (error) {
         console.error(error);
       } finally {
-        setLoading(false);
+        setTimeout(() => {
+          setLoading(false);
+        }, 500);
       }
     };
 

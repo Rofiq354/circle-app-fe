@@ -13,7 +13,9 @@ const ThreadComposer: React.FC<ThreadComposerProps> = ({
   className = "",
 }) => {
   const dispatch = useAppDispatch();
-  const userImage = useSelector((state: RootState) => state.profile.myProfile?.photo_profile);
+  const userImage = useSelector(
+    (state: RootState) => state.profile.myProfile?.photo_profile,
+  );
   const contentRef = useRef<HTMLInputElement>(null);
 
   const handleButtonClick = () => {

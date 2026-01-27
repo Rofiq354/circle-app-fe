@@ -1,6 +1,6 @@
 import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import { fetchMe } from "@/store/auth/authThunk";
-import { fetchProfile } from "@/store/profile/profileThunk";
+import { fetchMyProfile } from "@/store/profile/profileThunk";
 import { useEffect } from "react";
 import { Navigate, Outlet } from "react-router-dom";
 
@@ -16,7 +16,7 @@ const ProtectedRoute = () => {
 
   useEffect(() => {
     if (isAuthenticated) {
-      dispatch(fetchProfile());
+      dispatch(fetchMyProfile());
     }
   }, [dispatch, isAuthenticated]);
 

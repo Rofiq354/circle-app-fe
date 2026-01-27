@@ -2,16 +2,17 @@ import { ThreadProvider } from "@/context/Threads/ThreadContext";
 import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
 import Profile from "@/layouts/Profile";
 import Sidebar from "@/layouts/Sidebar";
-import { fetchMyProfile, updateProfile } from "@/store/profile/profileThunk";
+import { updateProfile } from "@/store/profile/profileThunk";
 import toast, { Toaster } from "react-hot-toast";
 import { Outlet, useNavigate } from "react-router-dom";
 import EditProfileModal from "@/components/Profile/EditProfileModal";
 import { closeEditModal, openEditModal } from "@/store/profile/profileSlice";
 import ThreadDialog from "@/components/Threads/ThreadDialog";
 import { closeModal, openModal } from "@/store/like/threadSlice";
-import { useEffect } from "react";
 import { HomeIcon, PlusCircleIcon, UserIcon } from "lucide-react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/store";
 
 const MainPage = () => {
   const { myProfile, isEditModalOpen } = useAppSelector(
@@ -21,10 +22,6 @@ const MainPage = () => {
     (state) => state.threads,
   );
   const dispatch = useAppDispatch();
-
-  useEffect(() => {
-    dispatch(fetchMyProfile());
-  }, [dispatch]);
 
   const handleSaveProfile = async (formData: FormData) => {
     try {
@@ -52,7 +49,7 @@ const MainPage = () => {
         </div>
       </main>
 
-      <div className="hidden xl:block w-112.5 shrink-0">
+      <div className="hidden 2xl:block w-137.5 shrink-0">
         <Profile onEditClick={() => dispatch(openEditModal())} />
       </div>
 
@@ -79,29 +76,35 @@ const MainPage = () => {
 const BottomNav = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const userImage = useSelector(
+    (state: RootState) => state.profile.myProfile?.photo_profile,
+  );
 
   return (
     <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-[#1d1d1d] border-t border-[#333] px-6 py-3 z-50">
       <div className="flex items-center justify-between max-w-md mx-auto">
-        <button onClick={() => navigate("/")} className="p-2 text-white">
+        <button
+          onClick={() => navigate("/")}
+          className="p-2 cursor-pointer text-white"
+        >
           <HomeIcon className="w-7 h-7" />
         </button>
-        <button className="p-2 text-white">
+        <button className="p-2 text-white cursor-pointer">
           <MagnifyingGlassIcon className="w-7 h-7" />
         </button>
         {/* Tombol Tengah (Create) biasanya dibuat lebih menonjol */}
         <button
           onClick={() => dispatch(openModal())}
-          className="p-2 text-green-500"
+          className="p-2 text-green-500 cursor-pointer"
         >
           <PlusCircleIcon className="w-8 h-8" />
         </button>
-        <button className="p-2 text-white">
+        <button className="p-2 text-white cursor-pointer">
           <UserIcon className="w-7 h-7" />
         </button>
-        <button className="p-2 text-white">
+        <button className="p-2 text-white cursor-pointer">
           <img
-            src="https://i.pravatar.cc/150?img=32"
+            src={userImage as string}
             className="w-7 h-7 rounded-full border border-[#444]"
             alt="profile"
           />

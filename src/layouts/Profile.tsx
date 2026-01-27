@@ -1,28 +1,119 @@
-import { useAppSelector } from "@/hooks/useAppDispatch";
+import { motion, AnimatePresence } from "framer-motion";
+import { useAppDispatch, useAppSelector } from "@/hooks/useAppDispatch";
+import { toggleFollow } from "@/services/follower.service";
+import {
+  getUsersSuggested,
+  type UsersFollow,
+} from "@/services/profile.service";
+import { toggleFollowOptimistic } from "@/store/profile/profileSlice";
+import { useEffect, useState } from "react";
+import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
 
 const Profile = ({ onEditClick }: { onEditClick: () => void }) => {
   const { isSidebarVisible } = useAppSelector((state) => state.profile);
+  const [userSuggested, setuserSuggested] = useState<UsersFollow[]>([]);
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await getUsersSuggested(1, 3);
+        setuserSuggested(res);
+      } catch (error) {
+        console.error(error);
+        toast.error(
+          error instanceof Error ? error.message : "Terjadi kesalahan.",
+        );
+      }
+    };
+
+    fetchData();
+  }, [dispatch]);
+
+  const handleFollowToggle = async (user: UsersFollow) => {
+    if (!user.id) return;
+
+    const previousSuggestions = [...userSuggested];
+
+    const updatedSuggestions = userSuggested.filter((u) => u.id !== user.id);
+    setuserSuggested(updatedSuggestions);
+
+    dispatch(
+      toggleFollowOptimistic({
+        userId: user.id,
+        isFollowing: user.isFollowed,
+      }),
+    );
+
+    try {
+      await toggleFollow(user.id);
+
+      // socket.emit("follow_clicked", { targetId: profileData.id });
+    } catch (error: unknown) {
+      dispatch(
+        toggleFollowOptimistic({
+          userId: user.id,
+          isFollowing: !user.isFollowed,
+        }),
+      );
+      setuserSuggested(previousSuggestions);
+      toast.error(
+        error instanceof Error ? error.message : "Terjadi kesalahan.",
+      );
+    }
+  };
+
   return (
     <aside className="bg-[#141414] h-full w-full text-white p-6  overflow-y-auto custom-scroll">
       {/* MY PROFILE CARD */}
       {isSidebarVisible && <CardProfile onEditClick={onEditClick} />}
 
       {/* SUGGESTED FOR YOU */}
-      <div className="mt-6 rounded-2xl bg-[#1f1f1f] p-5 border border-[#333]">
-        <h2 className="font-medium mb-4 text-xl">Suggested for you</h2>
+      <AnimatePresence>
+        {userSuggested.length > 0 && (
+          <motion.div
+            layout
+            initial={{ opacity: 1 }}
+            exit={{ opacity: 0, height: 0, marginTop: 0 }}
+            transition={{ duration: 0.5 }} // Delay sedikit agar list user selesai animasi dulu
+            className="mt-4 rounded-2xl bg-[#1f1f1f] p-5 border border-[#333] overflow-hidden"
+          >
+            <h2 className="font-medium mb-4 text-xl">Suggested for you</h2>
 
-        {[
-          { name: "Mohammed Jawahir", user: "@em.jawahir", following: true },
-          { name: "Shakia Kimathi", user: "@shakiakim", following: false },
-          { name: "Naveen Singh", user: "@naveeeen", following: false },
-        ].map((u, i) => (
-          <SuggestedForYou key={i} user={u} />
-        ))}
-      </div>
-
-      {/* FOOTER */}
-      <ProfileFooter />
+            <AnimatePresence mode="popLayout">
+              {userSuggested.map((u) => (
+                <motion.div
+                  key={u.id}
+                  layout
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{
+                    opacity: 0,
+                    transition: { duration: 0.2 },
+                  }}
+                >
+                  <SuggestedForYou
+                    user={u}
+                    onFollow={() => handleFollowToggle(u)}
+                  />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+        )}
+      </AnimatePresence>
+      <AnimatePresence>
+        {/* FOOTER */}
+        <motion.div
+          layout
+          initial={{ opacity: 1 }}
+          exit={{ opacity: 0, height: 0, marginTop: 0 }}
+          transition={{ duration: 0.5 }}
+        >
+          <ProfileFooter />
+        </motion.div>
+      </AnimatePresence>
     </aside>
   );
 };
@@ -179,29 +270,31 @@ const ProfileFooter = () => {
 };
 
 interface Props {
-  user: { name: string; user: string; following: boolean };
+  user: UsersFollow;
+  onFollow: () => void;
 }
 
-const SuggestedForYou: React.FC<Props> = ({ user }) => {
+const SuggestedForYou: React.FC<Props> = ({ user, onFollow }) => {
   return (
     <div className="flex items-center justify-between mb-4 last:mb-0">
       <div className="flex gap-3 items-center">
         <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
-          <img src={`https://i.pravatar.cc/150?u=${user.user}`} alt="avatar" />
+          <img src={`${user.photo_profile}`} alt="avatar" />
         </div>
         <div>
-          <p className="font-medium text-lg truncate w-52">{user.name}</p>
-          <p className="text-[#777]">{user.user}</p>
+          <p className="font-medium text-lg truncate w-52">{user.fullname}</p>
+          <p className="text-[#777]">@{user.username}</p>
         </div>
       </div>
       <button
+        onClick={onFollow}
         className={`text-sm font-bold px-4 py-1.5 rounded-full transition ${
-          user.following
+          user.isFollowed
             ? "border border-green-600 text-green-400/60 cursor-pointer transition-colors hover:bg-green-600/50 hover:text-white"
             : "bg-green-600 text-white cursor-pointer hover:bg-green-700 transition-colors"
         }`}
       >
-        {user.following ? "Following" : "Follow"}
+        {user.isFollowed ? "Following" : "Follow"}
       </button>
     </div>
   );

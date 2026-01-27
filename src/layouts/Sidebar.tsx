@@ -1,4 +1,5 @@
 import { useAppDispatch } from "@/hooks/useAppDispatch";
+import type { RootState } from "@/store";
 import { authLogout } from "@/store/auth/authThunk";
 import { openModal } from "@/store/like/threadSlice";
 import {
@@ -9,18 +10,28 @@ import {
   SearchIcon,
   UserIcon,
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-
-const menu = [
-  { name: "Home", icon: HomeIcon },
-  { name: "Search", icon: SearchIcon },
-  { name: "Follows", icon: UserIcon },
-  { name: "Profile", icon: CircleUser },
-];
+import { useSelector } from "react-redux";
+import { Link, useNavigate } from "react-router-dom";
 
 const Sidebar: React.FC = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const { myProfile } = useSelector((state: RootState) => state.profile);
+
+  const menu = [
+    { name: "Home", icon: HomeIcon, path: "/" },
+    { name: "Search", icon: SearchIcon, path: "/search" },
+    {
+      name: "Follows",
+      icon: UserIcon,
+      path: `/profile/${myProfile?.id}/followers`,
+    },
+    {
+      name: "Profile",
+      icon: CircleUser,
+      path: `/profile/${myProfile?.username}`,
+    },
+  ];
   const handleLogout = () => {
     setTimeout(() => {
       dispatch(authLogout()); // clear redux state
@@ -36,17 +47,19 @@ const Sidebar: React.FC = () => {
 
       <div className="flex flex-col gap-4">
         {menu.map((item) => (
-          <button
+          <Link
+            to={item.path}
             key={item.name}
             className="flex items-center justify-center lg:justify-start gap-3 px-4 py-3 cursor-pointer rounded-lg hover:bg-white/10 transition"
           >
             <item.icon className="w-6 h-6 lg:w-5 lg:h-5" />
-            {/* 3. Sembunyikan teks di layar kecil */}
+            {/* Sembunyikan teks di layar kecil */}
             <span className="hidden lg:block text-sm font-medium">
               {item.name}
             </span>
-          </button>
+          </Link>
         ))}
+
         <ButtonCreateThread />
       </div>
 
@@ -55,22 +68,24 @@ const Sidebar: React.FC = () => {
         {/* Section Akun Ringkas */}
         <div className="flex items-center justify-center lg:justify-start gap-3 px-2 lg:px-4 py-3 mb-2 2xl:hidden border-t border-[#333] pt-5 overflow-hidden">
           <img
-            src="https://i.pravatar.cc/150?img=32"
+            src={myProfile?.photo_profile as string}
             className="w-10 h-10 lg:w-9 lg:h-9 aspect-square min-w-10 lg:min-w-9 rounded-full object-cover border border-[#444] shrink-0"
             alt="profile"
           />
 
           {/* Gunakan min-w-0 pada container teks agar truncate bekerja tanpa merusak layout */}
           <div className="hidden lg:flex flex-col min-w-0 overflow-hidden">
-            <p className="text-sm font-bold truncate">Indah Pra Karya</p>
-            <p className="text-xs text-[#777] truncate">@indahpra</p>
+            <p className="text-sm font-bold truncate">{myProfile?.name}</p>
+            <p className="text-xs text-[#777] truncate">
+              @{myProfile?.username}
+            </p>
           </div>
         </div>
 
         {/* Logout Button */}
         <button
           onClick={handleLogout}
-          className="flex items-center justify-center lg:justify-start gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-[#bdbdbd]"
+          className="flex items-center cursor-pointer justify-center lg:justify-start gap-3 px-4 py-3 rounded-lg hover:bg-white/10 transition text-[#bdbdbd]"
         >
           <LogOutIcon className="w-6 h-6 lg:w-5 lg:h-5 -scale-x-100" />
           <span className="hidden lg:block text-sm">Logout</span>

@@ -10,6 +10,8 @@ import Threads from "./pages/Threads/Threads";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import ThreadDetailPage from "./pages/Threads/ThreadDetail";
 import DetailProfilePage from "./pages/Profile/DetailProfile";
+import FollowersList from "./pages/Profile/UserFollows";
+import SearchUsers from "./pages/Users/SearchUsers";
 
 function App() {
   return (
@@ -35,6 +37,15 @@ function App() {
                 path="/profile/:username"
                 element={<DetailProfilePage />}
               />
+
+              {/* Followers */}
+              <Route
+                path="profile/:targetUserId/followers"
+                element={<FollowersList />}
+              />
+
+              {/* Search Users */}
+              <Route path="search" element={<SearchUsers />} />
             </Route>
           </Route>
         </Routes>
