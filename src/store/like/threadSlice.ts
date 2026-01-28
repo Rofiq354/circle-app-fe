@@ -3,6 +3,7 @@ import {
   createSlice,
   createEntityAdapter,
   type PayloadAction,
+  createSelector,
 } from "@reduxjs/toolkit";
 import type { RootState } from "..";
 import { toggleLikeAction } from "./threadThunk";
@@ -89,6 +90,17 @@ export const selectThreadImage = (state: RootState, id: number) => {
 
 export const { selectAll: selectAllThreads, selectById: selectThreadById } =
   threadsAdapter.getSelectors((state: RootState) => state.threads);
+
+const selectAllThreadsData = (state: RootState) => selectAllThreads(state);
+
+// Selector memoized
+export const selectThreadsByUserId = createSelector(
+  [selectAllThreadsData, (_, userId: number | undefined) => userId],
+  (allThreads, userId) => {
+    if (!userId) return [];
+    return allThreads.filter((thread) => thread.user?.id === userId);
+  },
+);
 
 export const {
   openModal,

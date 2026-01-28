@@ -70,50 +70,52 @@ const Profile = ({ onEditClick }: { onEditClick: () => void }) => {
       {isSidebarVisible && <CardProfile onEditClick={onEditClick} />}
 
       {/* SUGGESTED FOR YOU */}
-      <AnimatePresence>
-        {userSuggested.length > 0 && (
+      <div className="overflow-hidden">
+        <AnimatePresence>
+          {userSuggested.length > 0 && (
+            <motion.div
+              layout
+              initial={{ opacity: 1 }}
+              exit={{ opacity: 0, height: 0, marginTop: 0 }}
+              transition={{ duration: 0.5 }} // Delay sedikit agar list user selesai animasi dulu
+              className="mt-4 rounded-2xl bg-[#1f1f1f] p-5 border border-[#333] overflow-hidden"
+            >
+              <h2 className="font-medium mb-4 text-xl">Suggested for you</h2>
+
+              <AnimatePresence mode="popLayout">
+                {userSuggested.map((u) => (
+                  <motion.div
+                    key={u.id}
+                    layout
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{
+                      opacity: 0,
+                      transition: { duration: 0.2 },
+                    }}
+                  >
+                    <SuggestedForYou
+                      user={u}
+                      onFollow={() => handleFollowToggle(u)}
+                    />
+                  </motion.div>
+                ))}
+              </AnimatePresence>
+            </motion.div>
+          )}
+        </AnimatePresence>
+        <AnimatePresence>
+          {/* FOOTER */}
           <motion.div
             layout
             initial={{ opacity: 1 }}
             exit={{ opacity: 0, height: 0, marginTop: 0 }}
-            transition={{ duration: 0.5 }} // Delay sedikit agar list user selesai animasi dulu
-            className="mt-4 rounded-2xl bg-[#1f1f1f] p-5 border border-[#333] overflow-hidden"
+            transition={{ duration: 0.5 }}
           >
-            <h2 className="font-medium mb-4 text-xl">Suggested for you</h2>
-
-            <AnimatePresence mode="popLayout">
-              {userSuggested.map((u) => (
-                <motion.div
-                  key={u.id}
-                  layout
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{
-                    opacity: 0,
-                    transition: { duration: 0.2 },
-                  }}
-                >
-                  <SuggestedForYou
-                    user={u}
-                    onFollow={() => handleFollowToggle(u)}
-                  />
-                </motion.div>
-              ))}
-            </AnimatePresence>
+            <ProfileFooter />
           </motion.div>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {/* FOOTER */}
-        <motion.div
-          layout
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0, height: 0, marginTop: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <ProfileFooter />
-        </motion.div>
-      </AnimatePresence>
+        </AnimatePresence>
+      </div>
     </aside>
   );
 };

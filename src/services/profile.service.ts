@@ -36,7 +36,7 @@ export const getUsersSuggested = async (
 export const getUsersBySearch = async (
   search: string,
 ): Promise<UsersFollow[]> => {
-  const res = await api.get<UsersResponse>(`/search?keyword=${search}`);
+  const res = await api.get<UsersResponse>(`/users/search?keyword=${search}`);
   return res.data.data;
 };
 

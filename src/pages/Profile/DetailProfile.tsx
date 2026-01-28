@@ -8,14 +8,14 @@ import {
   getUsersByUsername,
   type UsersFollow,
 } from "@/services/profile.service";
-import { getThreadByUserId } from "@/services/thread.service";
+import { selectThreadsByUserId } from "@/store/like/threadSlice";
 import {
   hideSidebar,
   openEditModal,
   showSidebar,
   toggleFollowOptimistic,
 } from "@/store/profile/profileSlice";
-import type { Thread } from "@/types/threads";
+// import type { Thread } from "@/types/threads";
 import axios from "axios";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
 import { ArrowLeft } from "lucide-react";
@@ -44,13 +44,16 @@ const itemVariants: Variants = {
 
 const DetailProfilePage: React.FC = () => {
   const { username } = useParams<{ username: string }>();
-  // const threads = useSelector(selectAllThreads);
-  const [threads, setThreads] = useState<Thread[]>([]);
   const [isFollowProcessing, setIsFollowProcessing] = useState(false);
   const [profileData, setProfileData] = useState<UsersFollow | null>(null);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<TabType>("all");
   const dispatch = useAppDispatch();
+
+  // 1. Ambil data dari global store menggunakan selector baru
+  const threads = useAppSelector((state) =>
+    selectThreadsByUserId(state, profileData?.id),
+  );
 
   const authUser = useAppSelector((state) => state.auth.user);
 
@@ -69,23 +72,6 @@ const DetailProfilePage: React.FC = () => {
       dispatch(showSidebar());
     };
   }, [username, isMyProfile, dispatch]);
-
-  useEffect(() => {
-    const fetchThreads = async () => {
-      if (!profileData?.id) return;
-      try {
-        const res = await getThreadByUserId(Number(profileData?.id));
-        setThreads(res);
-      } catch (error) {
-        if (axios.isAxiosError(error)) {
-          console.log(error.response?.data);
-          toast.error(error.response?.data.message);
-        }
-      }
-    };
-
-    fetchThreads();
-  }, [profileData?.id]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -108,9 +94,12 @@ const DetailProfilePage: React.FC = () => {
 
   const filteredThreads = useMemo(() => {
     if (activeTab === "media") {
-      return threads.filter((thread) => thread.image);
+      return threads.filter(
+        (thread) => thread.image || (thread.images && thread.images.length > 0),
+      );
     }
-    return threads;
+
+    return [...threads];
   }, [activeTab, threads]);
 
   const handleFollowToggle = async () => {
@@ -199,26 +188,51 @@ const DetailProfilePage: React.FC = () => {
       {/* Tabs */}
       <ProfileTabs activeTab={activeTab} setActiveTab={setActiveTab} />
 
-      <motion.div
-        key={activeTab}
-        variants={containerVariants}
-        initial="hidden"
-        animate="visible"
-        className="flex flex-col gap-4 mt-6"
-      >
-        {filteredThreads.length > 0 ? (
-          filteredThreads.map((thread) => (
-            // List Threads
-            <motion.div key={thread.id} variants={itemVariants}>
-              <ThreadItem {...thread} />
-            </motion.div>
-          ))
-        ) : (
-          <div className="py-20 text-center text-gray-500 italic">
-            Belum ada postingan {activeTab === "media" ? "media" : ""}
-          </div>
-        )}
-      </motion.div>
+      <div className="min-h-100">
+        <AnimatePresence mode="wait">
+          <motion.div
+            key={activeTab}
+            initial={{ opacity: 0, x: 10 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: -10 }}
+            transition={{ duration: 0.2 }}
+            variants={containerVariants}
+            className={`mt-6 ${
+              activeTab === "media"
+                ? "grid grid-cols-3 gap-1"
+                : "flex flex-col gap-4"
+            }`}
+          >
+            {filteredThreads.length > 0 ? (
+              filteredThreads.map((thread) => (
+                <motion.div key={thread.id} layout variants={itemVariants}>
+                  {activeTab === "media" ? (
+                    <div className="aspect-square w-full overflow-hidden bg-[#222] hover:opacity-80 transition cursor-pointer">
+                      <img
+                        src={
+                          (thread.image as string) || (thread.images as string)
+                        }
+                        className="w-full h-full object-cover"
+                        alt="media"
+                      />
+                    </div>
+                  ) : (
+                    <ThreadItem {...thread} />
+                  )}
+                </motion.div>
+              ))
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="py-20 text-center text-gray-500 italic col-span-3"
+              >
+                Belum ada postingan {activeTab === "media" ? "media" : ""}
+              </motion.div>
+            )}
+          </motion.div>
+        </AnimatePresence>
+      </div>
     </div>
   );
 };
