@@ -18,7 +18,7 @@ import {
 // import type { Thread } from "@/types/threads";
 import axios from "axios";
 import { motion, AnimatePresence, type Variants } from "framer-motion";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ImageIcon, User } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import { Link, useNavigate, useParams } from "react-router-dom";
@@ -271,28 +271,43 @@ interface ProfileBannerProps {
 }
 
 const ProfileBanner = ({ coverPhoto, photoProfile }: ProfileBannerProps) => {
+  const [isAvatarError, setIsAvatarError] = useState(false);
+  const [isCoverError, setIsCoverError] = useState(false);
+  const imageIcon = (
+    <div className="w-full h-full rounded-full bg-[#333] z-0 flex items-center justify-center border border-[#444]">
+      <User size={50} className="text-[#777]" />
+    </div>
+  );
   return (
     <div className="relative">
-      <div className="h-48 w-full bg-[#333] overflow-hidden">
-        {coverPhoto ? (
+      <div className="h-48 w-full bg-[#333] overflow-hidden relative">
+        {coverPhoto && !isCoverError ? (
           <img
             src={coverPhoto}
             className="w-full h-full object-cover"
             alt="banner"
+            onError={() => setIsCoverError(true)}
           />
         ) : (
-          <div className="w-full h-full bg-linear-to-r from-green-600/20 to-yellow-600/20" />
+          <div className="w-full h-full bg-linear-to-r from-green-600/20 to-yellow-600/20 flex items-center justify-center">
+            <ImageIcon size={40} className="text-white/10" />
+          </div>
         )}
       </div>
 
       {/* Avatar */}
       <div className="absolute -bottom-16 left-4">
         <div className="w-32 h-32 rounded-full border-4 border-[#1d1d1d] overflow-hidden bg-[#222]">
-          <img
-            src={photoProfile || "/default-avatar.png"}
-            className="w-full h-full object-cover"
-            alt="avatar"
-          />
+          {photoProfile && !isAvatarError ? (
+            <img
+              src={photoProfile}
+              alt="avatar"
+              className="w-full h-full rounded-full bg-blue-400 object-cover"
+              onError={() => setIsAvatarError(true)}
+            />
+          ) : (
+            imageIcon
+          )}
         </div>
       </div>
     </div>

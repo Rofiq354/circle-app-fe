@@ -1,5 +1,7 @@
 import type { Followers } from "@/services/follower.service";
+import { User } from "lucide-react";
 import type React from "react";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 
 interface Props {
@@ -8,15 +10,29 @@ interface Props {
 }
 
 const UserFollowItem: React.FC<Props> = ({ user, onFollow }) => {
+  const [isError, setIsError] = useState(false);
+  const imageIcon = (
+    <div className="w-14 h-14 rounded-full bg-[#333] z-0 flex items-center justify-center border border-[#444]">
+      <User size={20} className="text-[#777]" />
+    </div>
+  );
+
   return (
     <div key={user.id} className="flex items-start justify-between group">
       <div className="flex gap-4">
         {/* Avatar */}
-        <img
-          src={user.photo_profile as string}
-          alt={user.fullname}
-          className="w-14 h-14 rounded-full bg-blue-400 object-cover"
-        />
+        <div className="relative cursor-pointer">
+          {user?.photo_profile && !isError ? (
+            <img
+              src={user?.photo_profile as string}
+              alt="avatar"
+              className="w-14 h-14 rounded-full bg-blue-400 object-cover"
+              onError={() => setIsError(true)}
+            />
+          ) : (
+            imageIcon
+          )}
+        </div>
 
         {/* User Info */}
         <div className="flex flex-col">

@@ -84,7 +84,7 @@ const SearchUsers = ({ placeholder = "Search your friends" }) => {
   return (
     <div className="min-h-screen text-white px-4 pb-4 font-sans">
       {/* Search Bar */}
-      <div className="pb-4 pt-8 sticky top-0 px-2 bg-[#1d1d1d] mb-6">
+      <div className="pb-4 pt-8 sticky top-0 px-2 bg-[#1d1d1d] mb-6 z-99">
         <div className="relative">
           <div className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400" />

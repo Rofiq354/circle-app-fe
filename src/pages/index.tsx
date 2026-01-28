@@ -4,15 +4,14 @@ import Profile from "@/layouts/Profile";
 import Sidebar from "@/layouts/Sidebar";
 import { updateProfile } from "@/store/profile/profileThunk";
 import toast, { Toaster } from "react-hot-toast";
-import { Outlet, useNavigate } from "react-router-dom";
+import { NavLink, Outlet } from "react-router-dom";
 import EditProfileModal from "@/components/Profile/EditProfileModal";
 import { closeEditModal, openEditModal } from "@/store/profile/profileSlice";
 import ThreadDialog from "@/components/Threads/ThreadDialog";
 import { closeModal, openModal } from "@/store/like/threadSlice";
-import { HomeIcon, PlusCircleIcon, UserIcon } from "lucide-react";
+import { HomeIcon, PlusCircleIcon, User, UserIcon } from "lucide-react";
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/store";
+import { useState } from "react";
 
 const MainPage = () => {
   const { myProfile, isEditModalOpen } = useAppSelector(
@@ -75,40 +74,79 @@ const MainPage = () => {
 
 const BottomNav = () => {
   const dispatch = useAppDispatch();
-  const navigate = useNavigate();
-  const userImage = useSelector(
-    (state: RootState) => state.profile.myProfile?.photo_profile,
-  );
+  const myProfile = useAppSelector((state) => state.profile.myProfile);
+  const userImage = myProfile?.photo_profile;
+  const [isImageError, setIsImageError] = useState(false);
+
+  // Helper untuk styling active
+  const activeClass = "text-green-500 scale-110";
+  const inactiveClass = "text-white opacity-70 hover:opacity-100";
 
   return (
-    <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-[#1d1d1d] border-t border-[#333] px-6 py-3 z-50">
+    <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-[#1d1d1d]/90 backdrop-blur-md border-t border-[#333] px-6 py-3 z-50">
       <div className="flex items-center justify-between max-w-md mx-auto">
-        <button
-          onClick={() => navigate("/")}
-          className="p-2 cursor-pointer text-white"
+        {/* Home */}
+        <NavLink
+          to="/"
+          className={({ isActive }) =>
+            `p-2 transition-all ${isActive ? activeClass : inactiveClass}`
+          }
         >
           <HomeIcon className="w-7 h-7" />
-        </button>
-        <button className="p-2 text-white cursor-pointer">
+        </NavLink>
+
+        {/* Search */}
+        <NavLink
+          to="/search"
+          className={({ isActive }) =>
+            `p-2 transition-all ${isActive ? activeClass : inactiveClass}`
+          }
+        >
           <MagnifyingGlassIcon className="w-7 h-7" />
-        </button>
-        {/* Tombol Tengah (Create) biasanya dibuat lebih menonjol */}
+        </NavLink>
+
+        {/* Tombol Tengah (Create) */}
         <button
           onClick={() => dispatch(openModal())}
-          className="p-2 text-green-500 cursor-pointer"
+          className="p-2 text-green-500 cursor-pointer active:scale-90 transition-transform"
         >
-          <PlusCircleIcon className="w-8 h-8" />
+          <PlusCircleIcon className="w-10 h-10" />
         </button>
-        <button className="p-2 text-white cursor-pointer">
+
+        {/* Follows/User List */}
+        <NavLink
+          to={`/profile/${myProfile?.id}/followers`}
+          className={({ isActive }) =>
+            `p-2 transition-all ${isActive ? activeClass : inactiveClass}`
+          }
+        >
           <UserIcon className="w-7 h-7" />
-        </button>
-        <button className="p-2 text-white cursor-pointer">
-          <img
-            src={userImage as string}
-            className="w-7 h-7 rounded-full border border-[#444]"
-            alt="profile"
-          />
-        </button>
+        </NavLink>
+
+        {/* Profile Avatar */}
+        <NavLink
+          to={`/profile/${myProfile?.username}`}
+          className={({ isActive }) =>
+            `p-1 rounded-full border-2 transition-all ${
+              isActive
+                ? "border-green-500 scale-110"
+                : "border-transparent opacity-70"
+            }`
+          }
+        >
+          {userImage && !isImageError ? (
+            <img
+              src={userImage as string}
+              className="w-7 h-7 rounded-full object-cover"
+              alt="profile"
+              onError={() => setIsImageError(true)}
+            />
+          ) : (
+            <div className="w-7 h-7 rounded-full bg-[#333] flex items-center justify-center border border-[#c0c0c0]">
+              <User size={14} className="text-[#c0c0c0]" />
+            </div>
+          )}
+        </NavLink>
       </div>
     </nav>
   );

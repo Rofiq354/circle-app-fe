@@ -123,7 +123,7 @@ const FollowersList: React.FC = () => {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex border-b border-gray-800 mb-4 sticky top-0 bg-[#1d1d1d]">
+      <div className="flex border-b border-gray-800 mb-4 sticky top-0 bg-[#1d1d1d] z-99">
         <button
           onClick={() => setActiveTab("followers")}
           className={`flex-1 cursor-pointer py-5 text-lg text-center font-semibold transition-colors relative ${

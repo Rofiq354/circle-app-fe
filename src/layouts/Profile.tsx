@@ -9,6 +9,7 @@ import { toggleFollowOptimistic } from "@/store/profile/profileSlice";
 import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { Link } from "react-router-dom";
+import { User } from "lucide-react";
 
 const Profile = ({ onEditClick }: { onEditClick: () => void }) => {
   const { isSidebarVisible } = useAppSelector((state) => state.profile);
@@ -124,6 +125,7 @@ const CardProfile = ({ onEditClick }: { onEditClick: () => void }) => {
   const { myProfile, isMyProfileLoading } = useAppSelector(
     (state) => state.profile,
   );
+  const [isError, setIsError] = useState(false);
 
   if (isMyProfileLoading && !myProfile) {
     return (
@@ -136,6 +138,12 @@ const CardProfile = ({ onEditClick }: { onEditClick: () => void }) => {
   if (!myProfile) return null;
 
   const profile = myProfile;
+
+  const imageIcon = (
+    <div className="w-full h-full rounded-full bg-[#333] z-0 flex items-center justify-center border">
+      <User size={20} className="text-[#777]" />
+    </div>
+  );
 
   return (
     <div className="rounded-2xl bg-[#1f1f1f] border border-[#333] shadow-xl overflow-hidden">
@@ -152,14 +160,19 @@ const CardProfile = ({ onEditClick }: { onEditClick: () => void }) => {
           <div className="h-24 w-full rounded-xl bg-linear-to-r from-[#53906a] via-[#e2e88a] to-[#f4b678]"></div>
         )}
 
-        {/* Avatar Overlap */}
+        {/* Avatar Profile */}
         <div className="absolute -bottom-10 left-10">
           <div className="w-20 h-20 rounded-full border-[5px] border-[#1f1f1f] overflow-hidden shadow-lg">
-            <img
-              src={profile.photo_profile || "https://i.pravatar.cc/150?img=32"}
-              className="w-full h-full object-cover"
-              alt="profile"
-            />
+            {profile.photo_profile && !isError ? (
+              <img
+                src={profile.photo_profile as string}
+                alt="profile"
+                className="w-full h-full bg-blue-400 object-cover"
+                onError={() => setIsError(true)}
+              />
+            ) : (
+              imageIcon
+            )}
           </div>
         </div>
 
@@ -277,14 +290,33 @@ interface Props {
 }
 
 const SuggestedForYou: React.FC<Props> = ({ user, onFollow }) => {
+  const [isError, setIsError] = useState(false);
+  const imageIcon = (
+    <div className="w-full h-full rounded-full bg-[#333] z-0 flex items-center justify-center border border-[#444]">
+      <User size={20} className="text-[#777]" />
+    </div>
+  );
   return (
     <div className="flex items-center justify-between mb-4 last:mb-0">
       <div className="flex gap-3 items-center">
         <div className="w-10 h-10 rounded-full overflow-hidden shrink-0">
-          <img src={`${user.photo_profile}`} alt="avatar" />
+          {user?.photo_profile && !isError ? (
+            <img
+              src={user?.photo_profile as string}
+              alt="avatar"
+              className="w-full h-full bg-blue-400 object-cover"
+              onError={() => setIsError(true)}
+            />
+          ) : (
+            imageIcon
+          )}
         </div>
         <div>
-          <p className="font-medium text-lg truncate w-52">{user.fullname}</p>
+          <Link to={`/profile/${user.username}`}>
+            <p className="font-medium text-lg truncate w-52 hover:underline">
+              {user.fullname}
+            </p>
+          </Link>
           <p className="text-[#777]">@{user.username}</p>
         </div>
       </div>

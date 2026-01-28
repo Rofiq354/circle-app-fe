@@ -2,8 +2,8 @@ import { useAppDispatch } from "@/hooks/useAppDispatch";
 import type { RootState } from "@/store";
 import { openModal } from "@/store/like/threadSlice";
 import type { ThreadComposerProps } from "@/types/threads";
-import { PlusCircleIcon } from "lucide-react";
-import { useRef } from "react";
+import { PlusCircleIcon, User } from "lucide-react";
+import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 
 const ThreadComposer: React.FC<ThreadComposerProps> = ({
@@ -13,6 +13,7 @@ const ThreadComposer: React.FC<ThreadComposerProps> = ({
   className = "",
 }) => {
   const dispatch = useAppDispatch();
+  const [isError, setIsError] = useState(false);
   const userImage = useSelector(
     (state: RootState) => state.profile.myProfile?.photo_profile,
   );
@@ -28,17 +29,28 @@ const ThreadComposer: React.FC<ThreadComposerProps> = ({
     }
   };
 
+  const imageIcon = (
+    <div className="w-full h-full rounded-full bg-[#333] flex items-center justify-center border border-[#444]">
+      <User size={20} className="text-[#777]" />
+    </div>
+  );
+
   return (
     <div className={`w-full border-b border-[#222] px-6 py-3 ${className}`}>
       <h1 className="text-white text-2xl font-medium">Home</h1>
 
       <div className="flex items-center gap-3 w-full my-6">
         <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-700">
-          <img
-            src={userImage || "https://i.pravatar.cc/150"}
-            alt="avatar"
-            className="w-full h-full object-cover bg-white"
-          />
+          {userImage && !isError ? (
+            <img
+              src={userImage as string}
+              alt="avatar"
+              className="w-full h-full object-cover bg-[#333]"
+              onError={() => setIsError(true)}
+            />
+          ) : (
+            imageIcon
+          )}
         </div>
 
         <input

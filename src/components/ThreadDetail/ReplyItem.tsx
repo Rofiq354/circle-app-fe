@@ -1,29 +1,43 @@
-import React, { memo } from "react";
-import { Heart as HeartIcon, MessagesSquare } from "lucide-react";
+import React, { memo, useState } from "react";
+import { Heart as HeartIcon, MessagesSquare, User } from "lucide-react";
 import type { Reply } from "@/types/reply";
 import { timeAgo } from "@/lib/times";
 import { Link } from "react-router-dom";
 
 const ReplyItem: React.FC<Reply> = memo(
   ({ user, content, image, image_url, created_at }) => {
+    const [isError, setIsError] = useState(false);
     const imageUrl = image || image_url;
-    const defaultAvatar = "https://i.pravatar.cc/100?img=32";
     const isLiked = false;
     const likes = 0;
     const replies = 0;
+
+    const imageIcon = (
+      <div className="w-10 h-10 rounded-full bg-[#333] flex items-center justify-center border border-[#444]">
+        <User size={20} className="text-[#777]" />
+      </div>
+    );
 
     return (
       <div className="w-full bg-inherit">
         {/* Content Parent */}
         <div className="border-b border-[#333] py-4 px-7">
           <div className="flex gap-3">
-            <img
-              src={
-                user?.profile_picture || user?.photo_profile || defaultAvatar
-              }
-              alt="avatar"
-              className="w-10 h-10 rounded-full bg-white object-cover"
-            />
+            <div className="relative cursor-pointer">
+              {(user?.profile_picture || user?.photo_profile) && !isError ? (
+                <img
+                  src={
+                    (user?.profile_picture as string) ||
+                    (user?.photo_profile as string)
+                  }
+                  alt="avatar"
+                  className="w-10 h-10 rounded-full object-cover bg-[#333]"
+                  onError={() => setIsError(true)}
+                />
+              ) : (
+                imageIcon
+              )}
+            </div>
 
             <div className="flex-1">
               <div className="flex items-center gap-2">

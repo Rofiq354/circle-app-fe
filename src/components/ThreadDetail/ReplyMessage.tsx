@@ -1,7 +1,7 @@
 import type { RootState } from "@/store";
 import type { ThreadComposerProps } from "@/types/threads";
 import { motion, AnimatePresence } from "framer-motion";
-import { PlusCircleIcon, Trash2Icon, XIcon } from "lucide-react";
+import { PlusCircleIcon, Trash2Icon, User, XIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -19,6 +19,7 @@ const ReplyMessage: React.FC<ThreadComposerProps> = ({
   const [showPreviewModal, setShowPreviewModal] = useState(false); // Kontrol modal
   const fileInputRef = useRef<HTMLInputElement>(null);
   const contentRef = useRef<HTMLInputElement>(null);
+  const [isError, setIsError] = useState(false);
 
   const handleChangeImages = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
@@ -63,17 +64,28 @@ const ReplyMessage: React.FC<ThreadComposerProps> = ({
     }
   };
 
+  const imageIcon = (
+    <div className="w-full h-full rounded-full bg-[#333] flex items-center justify-center border border-[#444]">
+      <User size={20} className="text-[#777]" />
+    </div>
+  );
+
   return (
     <div
       className={`w-full border-b border-[#333] bg-[#1d1d1d] py-6 sticky top-0 px-7 ${className}`}
     >
       <form onSubmit={handleSubmit} className="flex items-center gap-3 w-full">
         <div className="w-10 h-10 rounded-full overflow-hidden shrink-0 border border-gray-700">
-          <img
-            src={userImage || "https://i.pravatar.cc/40"}
-            alt="avatar"
-            className="w-full h-full object-cover bg-white"
-          />
+          {userImage && !isError ? (
+            <img
+              src={userImage as string}
+              alt="avatar"
+              className="w-full h-full object-cover bg-[#333]"
+              onError={() => setIsError(true)}
+            />
+          ) : (
+            imageIcon
+          )}
         </div>
 
         <input
