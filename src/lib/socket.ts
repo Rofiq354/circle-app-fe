@@ -1,4 +1,6 @@
 import { io } from "socket.io-client";
 
-const socket = io("http://localhost:3003", { transports: ["websocket"] });
+const socket = io(`${import.meta.env.VITE_BACK_END_URL}`, {
+  transports: ["websocket"],
+});
 export default socket;
